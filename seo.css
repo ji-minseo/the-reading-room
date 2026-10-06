@@ -27,3 +27,29 @@
 .not-found-page h1{margin:0;font:400 clamp(42px,7vw,70px)/1 var(--serif);letter-spacing:-.045em}
 .not-found-page p{margin:18px auto 24px;max-width:480px;color:var(--muted);font-size:12px;line-height:1.9}
 .not-found-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}.not-found-actions a{display:inline-flex;padding:11px 15px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:700}.not-found-actions a:first-child{background:var(--wine);border-color:var(--wine);color:var(--paper2)}
+
+/* Readability pass for search-entry pages and the 78-card dictionary. */
+.seo-topbar nav{font-size:11px}
+.breadcrumb{font-size:10px}
+.seo-hero p{font-size:14px;line-height:1.9}
+.meta-row span,
+.keyword-row span{font-size:10px}
+.primary-cta{font-size:12px}
+
+.section-head p{font-size:13px;line-height:1.85}
+.position-grid p,
+.meaning-grid p,
+.topic-grid p,
+.faq-list p{
+  font-size:13px;
+  line-height:1.85;
+}
+.related-link span{font-size:14px}
+.related-link small{font-size:11px;line-height:1.55}
+
+.card-tile strong{font-size:13px}
+.card-tile span{font-size:12px}
+.card-tile small{font-size:10px;line-height:1.6}
+
+.seo-footer>div,
+.seo-footer nav{font-size:10px}
