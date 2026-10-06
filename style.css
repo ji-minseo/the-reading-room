@@ -573,3 +573,21 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 /* Tighten deck browser top spacing. */
 .deck-browser{padding-top:0!important}
 @media(max-width:650px){.deck-browser{padding-top:0!important}}
+
+/* Keep spread card tops aligned even when position labels wrap. */
+.position-slot{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+}
+.position-slot p{
+  min-height:22px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:center;
+}
+@media(max-width:650px){
+  .position-slot p{min-height:24px}
+}
