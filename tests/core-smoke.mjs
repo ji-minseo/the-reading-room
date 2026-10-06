@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict';
 import {cards} from '../core/data/cards.mjs';
 import {readings} from '../core/data/readings.mjs';
-import {shuffleDeck,interpret,synthesis} from '../core/engine.mjs';
+import {shuffleDeck,interpret,synthesis,koreanParticle,withParticle} from '../core/engine.mjs';
 
 assert.equal(cards.length,78,'The deck must contain 78 cards');
 assert.equal(Object.keys(readings).length,12,'The Reading Room must expose 12 readings');
+
+assert.equal(withParticle('교황','이/가'),'교황이');
+assert.equal(withParticle('여사제','이/가'),'여사제가');
+assert.equal(withParticle('호기심','을/를'),'호기심을');
+assert.equal(withParticle('상실 · 애도','을/를'),'상실 · 애도를');
+assert.equal(withParticle('흐름','으로/로'),'흐름으로');
+assert.equal(withParticle('별','으로/로'),'별로');
 
 for(let run=0;run<50;run++){
   const deck=shuffleDeck();
