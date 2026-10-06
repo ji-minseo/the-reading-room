@@ -2,6 +2,22 @@ import {positionVoices,themes} from './data/narratives.mjs';
 import {cards} from './data/cards.mjs';
 import {readings} from './data/readings.mjs';
 import {readingContexts,contextProfiles} from './data/reading-contexts.mjs';
+export function koreanParticle(text,pair){
+ const value=String(text??'').trim();
+ let jong=0,found=false;
+ for(let i=value.length-1;i>=0;i--){
+  const code=value.charCodeAt(i);
+  if(code>=0xAC00&&code<=0xD7A3){jong=(code-0xAC00)%28;found=true;break;}
+ }
+ if(!found)jong=0;
+ if(pair==='이/가')return jong?'이':'가';
+ if(pair==='은/는')return jong?'은':'는';
+ if(pair==='을/를')return jong?'을':'를';
+ if(pair==='과/와')return jong?'과':'와';
+ if(pair==='으로/로')return !jong||jong===8?'로':'으로';
+ return '';
+}
+export function withParticle(text,pair){return String(text)+koreanParticle(text,pair);}
 export function randomInt(max,cryptoSource=globalThis.crypto){
  if(!Number.isSafeInteger(max)||max<1)throw new Error('Invalid random range');
  const limit=Math.floor(4294967296/max)*max;const a=new Uint32Array(1);do{cryptoSource.getRandomValues(a);}while(a[0]>=limit);return a[0]%max;
@@ -389,7 +405,7 @@ export function timingInsight(slug,picks){
   }
  };
  const ordered=[...items].sort((a,b)=>b.weight-a.weight),fastest=ordered[0],slowest=ordered.at(-1);
- const basis=fastest.weight>=.7&&slowest.weight<=-.7?`${fastest.card.koreanName}가 속도를 올리는 반면 ${slowest.card.koreanName}가 흐름을 늦춰, 두 카드 사이의 균형까지 반영했어요.`:fastest.weight>=.7?`${fastest.card.koreanName}처럼 빠르게 움직이는 카드가 전체 시기를 조금 앞당기는 쪽으로 반영됐어요.`:slowest.weight<=-.7?`${slowest.card.koreanName}처럼 천천히 진행되는 카드가 있어, 결과보다 준비와 정리 시간을 더 길게 잡았어요.`:'카드들의 기본 속도가 크게 엇갈리지 않아 전체 배열의 흐름을 중심으로 시기를 잡았어요.';
+ const basis=fastest.weight>=.7&&slowest.weight<=-.7?`${withParticle(fastest.card.koreanName,'이/가')} 속도를 올리는 반면 ${withParticle(slowest.card.koreanName,'이/가')} 흐름을 늦춰, 두 카드 사이의 균형까지 반영했어요.`:fastest.weight>=.7?`${fastest.card.koreanName}처럼 빠르게 움직이는 카드가 전체 시기를 조금 앞당기는 쪽으로 반영됐어요.`:slowest.weight<=-.7?`${slowest.card.koreanName}처럼 천천히 진행되는 카드가 있어, 결과보다 준비와 정리 시간을 더 길게 잡았어요.`:'카드들의 기본 속도가 크게 엇갈리지 않아 전체 배열의 흐름을 중심으로 시기를 잡았어요.';
  return {label:labels[pace],range:ranges[slug][pace],text:copy[slug][pace],pace,basis,score:Number(score.toFixed(2))};
 }
 const actionScenes={
