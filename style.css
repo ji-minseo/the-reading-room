@@ -387,3 +387,80 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   from{opacity:0;transform:translateY(18px)}
   to{opacity:1;transform:none}
 }
+
+/* Deck entrance v2 — visibly fans open card by card. */
+.deck-track{
+  transform-origin:center bottom;
+}
+.draw-area.is-entering .deck-track{
+  opacity:.001;
+  transform:scaleX(.78) translateY(8px);
+}
+.draw-area.is-ready .deck-track{
+  opacity:1;
+  transform:none;
+  transition:opacity .18s ease,transform .46s cubic-bezier(.18,.76,.22,1);
+}
+.deck-card{
+  opacity:1;
+  transform:none;
+}
+.draw-area.is-ready .deck-card{
+  animation:roomDeckDeal .62s cubic-bezier(.18,.76,.22,1) backwards;
+  animation-delay:var(--deal-delay,0ms);
+  transition:
+    transform .24s cubic-bezier(.2,.72,.25,1),
+    opacity .24s ease,
+    filter .24s ease;
+}
+@keyframes roomDeckDeal{
+  0%{
+    opacity:0;
+    transform:
+      translate3d(var(--spread-shift,0px),22px,0)
+      scale(.94)
+      rotate(var(--entry-rotate,0deg));
+    filter:saturate(.7);
+  }
+  58%{
+    opacity:1;
+    transform:
+      translate3d(calc(var(--spread-shift,0px) * .16),-3px,0)
+      scale(1.012)
+      rotate(calc(var(--entry-rotate,0deg) * .15));
+    filter:saturate(.95);
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1) rotate(0);
+    filter:none;
+  }
+}
+.draw-area.is-ready .deck-card:hover,
+.draw-area.is-ready .deck-card:focus-visible{
+  animation-fill-mode:both;
+  transform:translateY(-17px) scale(1.035);
+  z-index:8;
+}
+.deck-card.is-launching{
+  opacity:.32!important;
+  filter:saturate(.55);
+  transform:translateY(-6px) scale(.965)!important;
+}
+.deck-card.is-selected{
+  opacity:.12!important;
+  filter:saturate(.42);
+  transform:translateY(-4px) scale(.95)!important;
+}
+@media(max-width:650px){
+  .draw-area.is-ready .deck-card{animation-duration:.5s}
+}
+@media(prefers-reduced-motion:reduce){
+  .draw-area.is-ready .deck-card,
+  .draw-area.is-ready .deck-track{
+    animation:none!important;
+    transition:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+}
