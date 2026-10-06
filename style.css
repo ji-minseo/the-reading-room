@@ -1283,3 +1283,41 @@ body{
 @media(max-width:520px){
   .prompt-meta{font-size:9px}
 }
+
+/* Small gold details around the title label and reading capsules. */
+.room-copy > .kicker{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+.room-copy > .kicker::before,
+.room-copy > .kicker::after{
+  content:'';
+  width:28px;
+  height:1px;
+  background:var(--gold);
+  opacity:.65;
+  pointer-events:none;
+}
+.reading-pills{position:relative}
+.reading-pills::before,
+.reading-pills::after{
+  content:'';
+  position:absolute;
+  top:18px;
+  width:18px;
+  height:1px;
+  background:var(--gold);
+  opacity:.55;
+  pointer-events:none;
+}
+.reading-pills::before{left:-28px}
+.reading-pills::after{right:-28px}
+@media(max-width:960px){
+  .reading-pills::before,.reading-pills::after{display:none}
+}
+@media(max-width:520px){
+  .room-copy > .kicker{gap:9px}
+  .room-copy > .kicker::before,.room-copy > .kicker::after{width:20px}
+}
