@@ -1238,3 +1238,48 @@ body{
   word-break:keep-all;
   overflow-wrap:break-word;
 }
+
+/* Readability pass: preserve tiny editorial labels, enlarge information users actually read. */
+.context-row,
+#context-label,
+.context-pill{font-size:11px}
+
+.position-slot p,
+.revealed p,
+.interpretation-index{font-size:11px}
+
+.interpretation-body .context,
+.interpretation-body .example{
+  font-size:13px;
+  line-height:1.8;
+}
+
+.interpretation-body .example strong{font-size:11px}
+
+.interpretation-body .lens,
+.interpretation-body .caution,
+.yesno-result>p{
+  font-size:12px;
+  line-height:1.75;
+}
+
+.insight-card small{font-size:11px}
+.combination-grid article>span{font-size:11px}
+.keywords span{font-size:10px}
+
+.result-reading-links strong{font-size:13px}
+.result-reading-links span{font-size:11px;line-height:1.6}
+.result-card-links a{font-size:11px}
+.result-library-link{font-size:11px}
+
+.prompt-error,
+.result-notice{font-size:11px}
+.share-action-item .share-feedback{font-size:10px}
+
+.seo-topbar nav{font-size:11px}
+.seo-footer>div,
+.seo-footer nav{font-size:10px}
+
+@media(max-width:520px){
+  .prompt-meta{font-size:9px}
+}
