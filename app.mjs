@@ -46,6 +46,24 @@ function renderSelectedReading(){
   selected.innerHTML=`<span>${readings[state.slug].name}</span><button type="button" data-action="clear-reading" aria-label="리딩 선택 해제">×</button>`;
 }
 
+function wireContextPills(){
+  $$('#context-options [data-context]').forEach(button=>{
+    button.onclick=()=>{
+      state.contextKey=button.dataset.context;
+      $$('#context-options [data-context]').forEach(node=>node.classList.toggle('is-selected',node===button));
+      $('#context-row').classList.remove('needs-choice');
+    };
+  });
+  $$('#context-options [data-count]').forEach(button=>{
+    button.onclick=()=>{
+      state.yesNoCount=Number(button.dataset.count);
+      state.required=state.yesNoCount;
+      $$('#context-options [data-count]').forEach(node=>node.classList.toggle('is-selected',node===button));
+      $('#context-row').classList.remove('needs-choice');
+    };
+  });
+}
+
 function renderContext(){
   const row=$('#context-row');
 
@@ -59,6 +77,7 @@ function renderContext(){
     ].map(([count,label])=>
       `<button class="context-pill ${state.yesNoCount===count?'is-selected':''}" type="button" data-count="${count}">${label}</button>`
     ).join('');
+    wireContextPills();
     return;
   }
 
@@ -75,8 +94,8 @@ function renderContext(){
   $('#context-options').innerHTML=context.options.map(([key,label])=>
     `<button class="context-pill ${state.contextKey===key?'is-selected':''}" type="button" data-context="${key}">${label}</button>`
   ).join('');
+  wireContextPills();
 }
-
 function chooseReading(slug){
   if(!readings[slug]) return;
   state.slug=slug;
@@ -89,7 +108,9 @@ function chooseReading(slug){
   renderSelectedReading();
   renderContext();
   $('#draw-area').hidden=true;
+  $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
+  $('#result-area').classList.remove('is-entering');
   requestAnimationFrame(()=>$('#question-input').focus());
 }
 
@@ -109,16 +130,20 @@ function buildPositionRail(){
   if(!state.slug) return;
   const positions=readings[state.slug].positions.slice(0,state.required);
   $('#position-rail').innerHTML=positions.map((position,index)=>{
-    const filled=Boolean(state.selected[index]);
+    const pick=state.selected[index];
+    const filled=Boolean(pick);
+    const card=filled?cardById(pick.id):null;
+    const front=filled&&card
+      ? `<span class="position-placeholder has-front"><img src="${artworkUrl(card)}" class="${pick.reversed?'is-reversed':''}" alt=""></span>`
+      : `<span class="position-placeholder">${index+1}</span>`;
     return `
       <button class="position-slot ${filled?'is-filled':''}" type="button" data-slot-index="${index}" ${filled?'':'disabled'}>
-        <span class="position-placeholder">${filled?'':index+1}</span>
+        ${front}
         <p>${position.label}</p>
       </button>
     `;
   }).join('');
 }
-
 function buildDeck(){
   const middle=(state.deck.length-1)/2;
   $('#deck-track').innerHTML=state.deck.map((pick,index)=>{
@@ -126,8 +151,9 @@ function buildDeck(){
     const rotate=(t*7).toFixed(2);
     const y=(Math.abs(t)*13).toFixed(1);
     const picked=state.selected.some(item=>item.deckIndex===index);
+    const dealDelay=Math.min(index,28)*9;
     return `
-      <button class="deck-card ${picked?'is-selected':''}" type="button" data-deck-index="${index}" style="--r:${rotate}deg;--y:${y}px" aria-label="뒤집힌 카드 ${index+1}">
+      <button class="deck-card ${picked?'is-selected':''}" type="button" data-deck-index="${index}" style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms" aria-label="뒤집힌 카드 ${index+1}">
         <span class="deck-card-inner"></span>
       </button>
     `;
@@ -151,6 +177,17 @@ function openDraw(){
     $('#reading-pills').animate?.([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:260});
     return;
   }
+
+  const context=readingContexts[state.slug];
+  if(context?.options?.length&&!state.contextKey){
+    const row=$('#context-row');
+    row.classList.remove('needs-choice');
+    void row.offsetWidth;
+    row.classList.add('needs-choice');
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
   state.question=$('#question-input').value.trim();
   state.required=requiredCount();
 
@@ -169,12 +206,85 @@ function openDraw(){
   buildDeck();
   updateDraw();
   $('#result-area').hidden=true;
-  $('#draw-area').hidden=false;
+  const draw=$('#draw-area');
+  draw.hidden=false;
+  draw.classList.remove('is-ready','is-leaving');
+  draw.classList.add('is-entering');
 
-  requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    draw.classList.remove('is-entering');
+    draw.classList.add('is-ready');
     const browser=$('#deck-browser');
     browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
-    $('#draw-area').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    draw.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }));
+}
+function animatePickToSlot(button,slot,pick){
+  const target=slot?.querySelector('.position-placeholder');
+  const card=cardById(pick.id);
+  const settle=()=>{
+    buildPositionRail();
+    const next=$('#position-rail').querySelector(`[data-slot-index="${state.selected.length}"]`);
+    next?.classList.add('is-next');
+    button?.classList.remove('is-launching');
+    button?.classList.add('is-selected');
+  };
+
+  if(slot) slot.classList.add('is-receiving');
+  if(!button||!target||!card||matchMedia('(prefers-reduced-motion: reduce)').matches||typeof button.animate!=='function'){
+    settle();
+    return;
+  }
+
+  const from=button.getBoundingClientRect();
+  const to=target.getBoundingClientRect();
+  const flyer=document.createElement('div');
+  flyer.className='table-flying-card';
+  flyer.setAttribute('aria-hidden','true');
+  flyer.innerHTML=`<span class="flight-card-inner"><span class="flight-card-back"></span><span class="flight-card-front"><img src="${artworkUrl(card)}" class="${pick.reversed?'is-reversed':''}" alt=""></span></span>`;
+  document.body.appendChild(flyer);
+
+  const startLeft=from.left+(from.width-to.width)/2;
+  const startTop=from.top+(from.height-to.height)/2;
+  Object.assign(flyer.style,{left:`${startLeft}px`,top:`${startTop}px`,width:`${to.width}px`,height:`${to.height}px`});
+  const dx=to.left-startLeft,dy=to.top-startTop,startScale=from.width/to.width;
+  const liftScale=Math.min(Math.max(startScale*1.12,.9),1.14);
+  const turn=dx>=0?1.8:-1.8;
+
+  button.classList.add('is-launching');
+  slot?.classList.add('is-receiving');
+
+  const outer=flyer.animate([
+    {transform:'translate3d(0,0,0)',offset:0},
+    {transform:`translate3d(${dx*.34}px,${dy*.30-30}px,0) rotateZ(${turn}deg)`,offset:.34},
+    {transform:`translate3d(${dx*.76}px,${dy*.73-14}px,0) rotateZ(${turn*.35}deg)`,offset:.76},
+    {transform:`translate3d(${dx}px,${dy}px,0) rotateZ(0deg)`,offset:1}
+  ],{duration:820,easing:'cubic-bezier(.18,.76,.22,1)',fill:'forwards'});
+
+  const sizing=flyer.animate([
+    {scale:String(startScale),offset:0},
+    {scale:String(liftScale),offset:.34},
+    {scale:String((liftScale+1)/2),offset:.76},
+    {scale:'1',offset:1}
+  ],{duration:820,easing:'cubic-bezier(.18,.76,.22,1)',fill:'forwards'});
+
+  flyer.querySelector('.flight-card-inner')?.animate([
+    {transform:'rotateY(0deg)',offset:0},
+    {transform:'rotateY(0deg)',offset:.26},
+    {transform:'rotateY(180deg)',offset:.72},
+    {transform:'rotateY(180deg)',offset:1}
+  ],{duration:740,delay:80,easing:'cubic-bezier(.2,.68,.24,1)',fill:'forwards'});
+
+  outer.finished.then(()=>{
+    sizing.cancel();
+    flyer.remove();
+    slot?.classList.remove('is-receiving');
+    settle();
+  }).catch(()=>{
+    sizing.cancel();
+    flyer.remove();
+    slot?.classList.remove('is-receiving');
+    settle();
   });
 }
 
@@ -183,15 +293,27 @@ function pickCard(index){
   if(state.selected.some(item=>item.deckIndex===index)) return;
   const pick=state.deck[index];
   if(!pick) return;
+
+  const slotIndex=state.selected.length;
+  const button=$(`[data-deck-index="${index}"]`);
+  const slot=$(`[data-slot-index="${slotIndex}"]`);
   state.selected.push({...pick,deckIndex:index});
-  updateDraw();
+
+  $('#selected-count').textContent=state.selected.length;
+  $('#required-count').textContent=state.required;
+  $('#reveal-button').disabled=state.selected.length!==state.required;
+  const left=state.required-state.selected.length;
+  $('#draw-note').textContent=left>0?`마음이 가는 카드를 ${left}장 더 골라주세요.`:'카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
+
+  animatePickToSlot(button,slot,state.selected.at(-1));
   navigator.vibrate?.(8);
 }
-
 function unpick(index){
   if(index<0||index>=state.selected.length) return;
   state.selected.splice(index,1);
+  buildDeck();
   updateDraw();
+  $('#draw-area').classList.add('is-ready');
 }
 
 function reshuffle(){
@@ -264,14 +386,26 @@ function showResult(){
   }
 
   renderInterpretations(picks);
-  $('#draw-area').hidden=true;
-  $('#result-area').hidden=false;
 
-  $$('#revealed-cards img').forEach(img=>img.addEventListener('error',()=>{img.style.opacity=.08},{once:true}));
+  const draw=$('#draw-area');
+  const result=$('#result-area');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const enter=()=>{
+    draw.hidden=true;
+    draw.classList.remove('is-ready','is-leaving');
+    result.hidden=false;
+    result.classList.remove('is-entering');
+    void result.offsetWidth;
+    result.classList.add('is-entering');
+    requestAnimationFrame(()=>result.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'}));
+  };
+  if(reduced) enter();
+  else{
+    draw.classList.add('is-leaving');
+    window.setTimeout(enter,320);
+  }
 
-  requestAnimationFrame(()=>{
-    $('#result-area').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-  });
+  $('#revealed-cards img').forEach(img=>img.addEventListener('error',()=>{img.style.opacity=.08},{once:true}));
 }
 
 function reset(){
