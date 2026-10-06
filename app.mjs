@@ -481,6 +481,13 @@ function installDeckDrag(){
   const browser=$('#deck-browser');
   let down=false,startX=0,startScroll=0;
 
+  browser.addEventListener('wheel',event=>{
+    const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
+    if(!delta) return;
+    event.preventDefault();
+    browser.scrollLeft+=delta;
+  },{passive:false});
+
   browser.addEventListener('pointerdown',event=>{
     if(event.target.closest('.deck-card')) return;
     if(event.pointerType==='touch') return;
