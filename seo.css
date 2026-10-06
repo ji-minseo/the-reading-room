@@ -53,22 +53,3 @@
 
 .seo-footer>div,
 .seo-footer nav{font-size:10px}
-
-/* Carry the original printed garden into reading guides and the card library. */
-.seo-page{position:relative;isolation:isolate}
-.seo-page::before{
-  content:'';position:absolute;z-index:-1;pointer-events:none;
-  top:0;left:50%;transform:translateX(-50%);width:100vw;height:620px;
-  background:url('/artwork/reading-room-garden.webp') center / cover no-repeat;
-  opacity:.28;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,black 15%,black 50%,transparent);
-  mask-image:linear-gradient(to bottom,transparent,black 15%,black 50%,transparent);
-}
-.seo-hero::before{
-  content:'';display:block;width:170px;height:52px;margin:0 auto 20px;
-  background:url('/artwork/reading-room-ornament.webp') center / contain no-repeat;
-}
-@media(max-width:760px){
-  .seo-page::before{height:520px;opacity:.18}
-  .seo-hero::before{width:140px;height:44px;margin-bottom:16px}
-}

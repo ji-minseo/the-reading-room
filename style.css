@@ -49,7 +49,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   animation:float 5.8s ease-in-out infinite;
 }
 .float-card{
-  position:absolute;inset:0;border-radius:8px;background:#632b3b url('/artwork/reading-room-card-back-v2.webp') center/100% 100% no-repeat;
+  position:absolute;inset:0;border-radius:8px;background:#632b3b url('/artwork/card-back.svg') center/100% 100% no-repeat;
   border:1px solid #632b3b;box-shadow:0 10px 26px rgba(49,28,31,.14);
 }
 .c5{transform:translate(-10px,11px) rotate(-8deg) translateZ(-24px);opacity:.72}
@@ -142,7 +142,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   display:grid;place-items:center;color:rgba(107,42,57,.3);font:400 17px/1 var(--serif);transition:.25s ease;
 }
 .position-slot.is-filled .position-placeholder{
-  border-style:solid;background:#632b3b url('/artwork/reading-room-card-back-v2.webp') center/100% 100% no-repeat;
+  border-style:solid;background:#632b3b url('/artwork/card-back.svg') center/100% 100% no-repeat;
   color:transparent;box-shadow:0 8px 18px rgba(60,35,36,.12);transform:translateY(-3px)
 }
 .position-slot p{margin:8px 0 0;font-size:10px;line-height:1.35;color:var(--muted)}
@@ -158,7 +158,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 }
 .deck-card:first-child{margin-left:0}
 .deck-card-inner{
-  position:absolute;inset:0;border-radius:8px;background:#632b3b url('/artwork/reading-room-card-back-v2.webp') center/100% 100% no-repeat;
+  position:absolute;inset:0;border-radius:8px;background:#632b3b url('/artwork/card-back.svg') center/100% 100% no-repeat;
   border:1px solid #632b3b;box-shadow:0 8px 18px rgba(55,31,32,.12);
   transform:rotate(var(--r,0deg)) translateY(var(--y,0px));transition:.22s ease;
 }
@@ -186,7 +186,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 }
 @keyframes flip{from{transform:rotateY(180deg)}to{transform:rotateY(0)}}
 .face,.back{position:absolute;inset:0;border-radius:8px;overflow:hidden;backface-visibility:hidden}
-.back{transform:rotateY(180deg);background:#632b3b url('/artwork/reading-room-card-back-v2.webp') center/100% 100% no-repeat;border:1px solid #632b3b}
+.back{transform:rotateY(180deg);background:#632b3b url('/artwork/card-back.svg') center/100% 100% no-repeat;border:1px solid #632b3b}
 .face{background:#f2eadc;border:1px solid #baa28a;padding:6px;box-shadow:0 14px 30px rgba(53,33,29,.13)}
 .face img{width:100%;height:100%;object-fit:cover;display:block;mix-blend-mode:multiply}
 .face img.is-reversed{transform:rotate(180deg)}
@@ -349,7 +349,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
 .flight-card-back{
-  background:#632b3b url('/artwork/reading-room-card-back-v2.webp') center/100% 100% no-repeat;
+  background:#632b3b url('/artwork/card-back.svg') center/100% 100% no-repeat;
   border:1px solid #632b3b;
   box-shadow:0 16px 34px rgba(55,31,32,.18);
 }
@@ -1282,49 +1282,4 @@ body{
 
 @media(max-width:520px){
   .prompt-meta{font-size:9px}
-}
-
-/* Original engraved artwork: quiet garden edges and a printed botanical deck. */
-.room{
-  position:relative;
-  isolation:isolate;
-}
-.room::before{
-  content:'';
-  position:absolute;
-  inset:0 0 auto;
-  height: min(920px, 100vh);
-  z-index:-1;
-  pointer-events:none;
-  background:url('/artwork/reading-room-garden.webp') center top / cover no-repeat;
-  opacity:.55;
-  -webkit-mask-image:linear-gradient(to bottom,transparent,black 9%,black 62%,transparent);
-  mask-image:linear-gradient(to bottom,transparent,black 9%,black 62%,transparent);
-}
-.float-card{
-  border-color:#592330;
-  box-shadow:0 12px 28px rgba(49,28,31,.17),inset 0 0 0 1px rgba(205,173,120,.16);
-}
-.result-head::before{
-  content:'';
-  display:block;
-  width:180px;
-  height:54px;
-  margin:0 auto 22px;
-  background:url('/artwork/reading-room-ornament.webp') center / contain no-repeat;
-  pointer-events:none;
-}
-.overall-reading{
-  background:rgba(255,250,241,.35);
-  padding:28px 26px;
-  border-radius:2px 2px 14px 14px;
-}
-@media(max-width:780px){
-  .room::before{
-    height:680px;
-    background-size:auto 680px;
-    opacity:.33;
-  }
-  .overall-reading{padding:24px 18px}
-  .result-head::before{width:145px;height:44px;margin-bottom:18px}
 }
