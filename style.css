@@ -560,3 +560,12 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   .draw-area.is-ready .deck-card{animation-duration:.7s}
   .deck-track.is-shuffling .deck-card{animation-duration:.66s!important}
 }
+
+/* Give selected spread cards headroom so lift/settle motion never clips. */
+.position-rail{
+  padding-top:28px;
+  margin-top:6px;
+}
+@media(max-width:650px){
+  .position-rail{padding-top:24px}
+}
