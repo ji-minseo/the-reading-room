@@ -1207,3 +1207,8 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
     display:none;
   }
 }
+
+/* Deck interaction: wheel-to-horizontal + grab anywhere, including cards. */
+.deck-browser{cursor:grab}
+.deck-browser.is-dragging{cursor:grabbing;user-select:none}
+.deck-browser.is-dragging .deck-card{cursor:grabbing}
