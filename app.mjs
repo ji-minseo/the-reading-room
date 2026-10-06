@@ -545,14 +545,33 @@ function installHeroTilt(){
   const deck=$('#floating-deck');
   const host=$('.floating-deck-wrap');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  host.addEventListener('pointermove',e=>{
+
+  host.addEventListener('pointermove',event=>{
     const r=host.getBoundingClientRect();
-    const x=(e.clientX-r.left)/r.width-.5;
-    const y=(e.clientY-r.top)/r.height-.5;
+    const nx=(event.clientX-r.left)/r.width-.5;
+    const ny=(event.clientY-r.top)/r.height-.5;
+    const cx=r.left+r.width/2;
+    const cy=r.top+r.height/2;
+    const dx=event.clientX-cx;
+    const dy=event.clientY-cy;
+
     deck.style.animation='none';
-    deck.style.transform=`translateY(-4px) rotateX(${(-y*8+2).toFixed(1)}deg) rotateY(${(x*12).toFixed(1)}deg)`;
+    deck.style.transform=`
+      translate3d(${(nx*34).toFixed(1)}px,${(ny*24-7).toFixed(1)}px,0)
+      rotateX(${(-ny*18+3).toFixed(1)}deg)
+      rotateY(${(nx*28).toFixed(1)}deg)
+    `;
+
+    const fanZoneX=Math.min(165,r.width*.22);
+    const fanZoneY=118;
+    deck.classList.toggle('is-fanned',Math.abs(dx)<fanZoneX&&Math.abs(dy)<fanZoneY);
   });
-  host.addEventListener('pointerleave',()=>{deck.style.transform='';deck.style.animation=''});
+
+  host.addEventListener('pointerleave',()=>{
+    deck.classList.remove('is-fanned');
+    deck.style.transform='';
+    deck.style.animation='';
+  });
 }
 
 document.addEventListener('click',e=>{
