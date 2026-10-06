@@ -598,3 +598,86 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 .interpretation-body h3{
   font-weight:700;
 }
+
+/* Locked spread slots: drawn cards cannot be removed. */
+.position-slot{
+  cursor:default;
+}
+.position-slot.is-filled{
+  pointer-events:none;
+}
+
+/* Reveal CTA glow appears only after every card has actually landed. */
+.reveal-button{
+  position:relative;
+  isolation:isolate;
+  transition:
+    background .22s ease,
+    transform .22s ease,
+    box-shadow .28s ease;
+}
+.reveal-button.is-ready{
+  transform:translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(154,122,72,.18),
+    0 7px 22px rgba(107,42,57,.18);
+  animation:revealButtonLift 2.2s ease-in-out infinite;
+}
+.reveal-button.is-ready::before,
+.reveal-button.is-ready::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:999px;
+  z-index:-1;
+}
+.reveal-button.is-ready::before{
+  inset:-6px;
+  border:1px solid rgba(154,122,72,.42);
+  box-shadow:
+    0 0 14px rgba(154,122,72,.18),
+    0 0 24px rgba(107,42,57,.12);
+  animation:revealGlowRing 2.2s ease-in-out infinite;
+}
+.reveal-button.is-ready::after{
+  inset:-12px;
+  background:radial-gradient(
+    ellipse at center,
+    rgba(154,122,72,.16) 0%,
+    rgba(107,42,57,.1) 42%,
+    rgba(107,42,57,0) 72%
+  );
+  filter:blur(7px);
+  opacity:.78;
+  animation:revealGlowAura 2.2s ease-in-out infinite;
+}
+@keyframes revealButtonLift{
+  0%,100%{transform:translateY(-1px) scale(1)}
+  50%{transform:translateY(-2px) scale(1.018)}
+}
+@keyframes revealGlowRing{
+  0%,100%{
+    opacity:.55;
+    transform:scale(.985);
+    box-shadow:0 0 10px rgba(154,122,72,.12),0 0 18px rgba(107,42,57,.08);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.045);
+    box-shadow:0 0 20px rgba(154,122,72,.34),0 0 34px rgba(107,42,57,.2);
+  }
+}
+@keyframes revealGlowAura{
+  0%,100%{opacity:.42;transform:scale(.94)}
+  50%{opacity:.92;transform:scale(1.12)}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal-button.is-ready,
+  .reveal-button.is-ready::before,
+  .reveal-button.is-ready::after{
+    animation:none!important;
+  }
+  .reveal-button.is-ready{
+    box-shadow:0 0 0 2px rgba(154,122,72,.28),0 7px 22px rgba(107,42,57,.18);
+  }
+}
