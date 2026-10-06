@@ -1343,3 +1343,24 @@ body{
     min-height:50px;
   }
 }
+
+@media(max-width:650px){
+  /* Mobile reveal controls keep identical geometry in disabled/ready states. */
+  .draw-actions,
+  .draw-actions.is-complete{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .draw-actions #reveal-button,
+  .draw-actions.is-complete .reveal-button{
+    order:-1;
+    width:100%;
+    min-height:50px;
+    padding:0 24px;
+    font-size:12px;
+  }
+  .draw-actions .ghost-button,
+  .draw-actions.is-complete .ghost-button{
+    width:100%;
+  }
+}
