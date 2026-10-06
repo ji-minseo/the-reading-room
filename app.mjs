@@ -18,7 +18,8 @@ const state={
   selected:[],
   required:0,
   yesNoCount:null,
-  reusedDaily:false
+  reusedDaily:false,
+  deckFocusIndex:0
 };
 
 const artworkAnchors={'major-0':'fool','major-6':'lovers','major-16':'tower','major-18':'moon','major-19':'sun'};
@@ -69,6 +70,7 @@ function wireContextPills(){
       $$('#context-options [data-context]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
       updatePromptGlow();
+      if(matchMedia('(hover:hover) and (pointer:fine)').matches) requestAnimationFrame(()=>$('#question-input').focus());
     };
   });
   $$('#context-options [data-count]').forEach(button=>{
@@ -78,6 +80,7 @@ function wireContextPills(){
       $$('#context-options [data-count]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
       updatePromptGlow();
+      if(matchMedia('(hover:hover) and (pointer:fine)').matches) requestAnimationFrame(()=>$('#question-input').focus());
     };
   });
 }
@@ -135,7 +138,10 @@ function chooseReading(slug){
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
   $('#result-area').classList.remove('is-entering');
-  requestAnimationFrame(()=>$('#question-input').focus());
+  const context=readingContexts[slug];
+  if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!context?.options?.length&&slug!=='yes-no'){
+    requestAnimationFrame(()=>$('#question-input').focus());
+  }
 }
 
 function clearReading(){
@@ -171,18 +177,46 @@ function buildPositionRail(){
     `;
   }).join('');
 }
+function focusDeckCard(index){
+  const buttons=$('#deck-track .deck-card');
+  if(!buttons.length)return;
+  let next=Math.max(0,Math.min(index,buttons.length-1));
+  let guard=buttons.length;
+  while(guard--&&state.selected.some(item=>item.deckIndex===next)){
+    next=(next+1)%buttons.length;
+  }
+  state.deckFocusIndex=next;
+  buttons.forEach((button,i)=>button.tabIndex=i===next?0:-1);
+  buttons[next]?.focus({preventScroll:true});
+}
 function wireDeckCards(){
-  $$('#deck-track .deck-card').forEach(button=>{
+  const buttons=$('#deck-track .deck-card');
+  buttons.forEach(button=>{
     button.addEventListener('click',event=>{
       event.preventDefault();
       event.stopPropagation();
       pickCard(Number(button.dataset.deckIndex));
+    });
+    button.addEventListener('focus',()=>{state.deckFocusIndex=Number(button.dataset.deckIndex)});
+    button.addEventListener('keydown',event=>{
+      const index=Number(button.dataset.deckIndex);
+      let next=null;
+      if(event.key==='ArrowRight')next=index+1;
+      else if(event.key==='ArrowLeft')next=index-1;
+      else if(event.key==='Home')next=0;
+      else if(event.key==='End')next=buttons.length-1;
+      if(next===null)return;
+      event.preventDefault();
+      focusDeckCard(next);
     });
   });
 }
 
 function buildDeck(){
   const middle=(state.deck.length-1)/2;
+  if(!Number.isInteger(state.deckFocusIndex)||state.deckFocusIndex<0||state.deckFocusIndex>=state.deck.length){
+    state.deckFocusIndex=Math.floor(middle);
+  }
   $('#deck-track').innerHTML=state.deck.map((pick,index)=>{
     const t=(index-middle)/Math.max(middle,1);
     const rotate=(t*7).toFixed(2);
@@ -198,6 +232,9 @@ function buildDeck(){
         class="deck-card ${picked?'is-selected':''}"
         type="button"
         data-deck-index="${index}"
+        tabindex="${index===state.deckFocusIndex&&!picked?'0':'-1'}"
+        aria-posinset="${index+1}"
+        aria-setsize="${state.deck.length}"
         style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms;--stack-shift:${stackShift}px;--stack-rotate:${stackRotate}deg;--shuffle-delay:${shuffleDelay}ms"
         aria-label="뒤집힌 카드 ${index+1}">
         <span class="deck-card-inner"></span>
@@ -212,6 +249,7 @@ function updateDraw(){
   const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
   $('#reveal-button').disabled=!allPlaced;
   $('#reveal-button').classList.toggle('is-ready',allPlaced);
+  $('.draw-actions')?.classList.toggle('is-complete',allPlaced);
   const left=state.required-state.selected.length;
   $('#draw-note').textContent=left>0
     ?`마음이 가는 카드를 ${left}장 더 골라주세요.`
@@ -273,6 +311,7 @@ function openDraw(){
 
   state.deck=shuffleDeck();
   state.selected=[];
+  state.deckFocusIndex=Math.floor((state.deck.length-1)/2);
   buildDeck();
   updateDraw();
   $('#result-area').hidden=true;
@@ -298,7 +337,11 @@ function animatePickToSlot(button,slot,pick){
     const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
     $('#reveal-button').disabled=!allPlaced;
     $('#reveal-button').classList.toggle('is-ready',allPlaced);
-    if(allPlaced) $('#draw-note').textContent='카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
+    $('.draw-actions')?.classList.toggle('is-complete',allPlaced);
+    if(allPlaced){
+      $('#draw-note').textContent='카드가 모두 놓였어요. 아래 버튼을 눌러 리딩을 펼쳐보세요.';
+      requestAnimationFrame(()=>$('#reveal-button').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'}));
+    }
     const next=$('#position-rail').querySelector(`[data-slot-index="${state.selected.length}"]`);
     next?.classList.add('is-next');
     button?.classList.remove('is-launching');
@@ -373,6 +416,7 @@ function pickCard(index){
   const button=$(`[data-deck-index="${index}"]`);
   const slot=$(`[data-slot-index="${slotIndex}"]`);
   state.selected.push({...pick,deckIndex:index,placed:false});
+  state.deckFocusIndex=Math.min(index+1,state.deck.length-1);
 
   $('#selected-count').textContent=state.selected.length;
   $('#required-count').textContent=state.required;
@@ -394,6 +438,7 @@ function reshuffle(){
   if(reduced){
     state.deck=shuffleDeck();
     state.selected=[];
+    state.deckFocusIndex=Math.floor((state.deck.length-1)/2);
     buildDeck();
     updateDraw();
     return;
@@ -411,6 +456,7 @@ function reshuffle(){
 
     state.deck=shuffleDeck();
     state.selected=[];
+    state.deckFocusIndex=Math.floor((state.deck.length-1)/2);
     buildDeck();
     updateDraw();
 
@@ -585,6 +631,8 @@ function showResult(){
   }
 
   renderInterpretations(picks);
+  const interpretationDisclosure=$('#interpretation-disclosure');
+  if(interpretationDisclosure) interpretationDisclosure.open=!matchMedia('(max-width:780px)').matches;
 
   const related=(readings[state.slug]?.related||[]).filter(slug=>readings[slug]);
   $('#result-discovery').innerHTML=`
@@ -672,6 +720,7 @@ function reset(){
   state.required=0;
   state.yesNoCount=null;
   state.reusedDaily=false;
+  state.deckFocusIndex=0;
   $('#question-input').value='';
   const shareFeedback=$('#share-feedback');
   if(shareFeedback) shareFeedback.textContent='';
@@ -790,6 +839,7 @@ document.addEventListener('click',e=>{
 
 $('#prompt-form').addEventListener('submit',e=>{e.preventDefault();openDraw()});
 $('#question-input').addEventListener('keydown',e=>{
+  if(e.isComposing||e.keyCode===229)return;
   if(e.key==='Enter'&&!e.shiftKey){
     e.preventDefault();
     openDraw();
