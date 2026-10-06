@@ -480,7 +480,7 @@ export function interpret(slug,pick,index){
  const card=cards.find(c=>c.id===pick.id),position=readings[slug]?.positions[index];
  if(!card||!position)throw new Error('Unknown card or position');
  const [opening,closing]=positionVoices[slug][index];
- const meaning=`${opening.replace(/에는$/, '에서 살펴볼 주제는')} ‘${card.keywords.join(' · ')}’입니다. ${pick.reversed?card.reversed:card.upright}로 읽을 수 있어요.`;
+ const meaning=`${opening.replace(/에는$/, '에서 살펴볼 주제는')} ‘${card.keywords.join(' · ')}’입니다. ${withParticle(pick.reversed?card.reversed:card.upright,'으로/로')} 읽을 수 있어요.`;
  const context=slug==='yes-no'?`${generalAdvice(card,pick.reversed)} ${closing}`:pick.reversed?`${card.advice} ${closing}`:`${card[position.field]} ${closing}`;
  const example=situationExample(slug,pick,index);
  return {card,position,meaning,context,example,lens:position.lens,caution:null};
