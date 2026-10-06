@@ -17,7 +17,8 @@ const state={
   deck:[],
   selected:[],
   required:0,
-  yesNoCount:null
+  yesNoCount:null,
+  reusedDaily:false
 };
 
 const artworkAnchors={'major-0':'fool','major-6':'lovers','major-16':'tower','major-18':'moon','major-19':'sun'};
@@ -119,6 +120,8 @@ function renderContext(){
 function chooseReading(slug){
   if(!readings[slug]) return;
   state.slug=slug;
+  const promptError=$('#prompt-error');
+  if(promptError) promptError.textContent='';
   state.contextKey=null;
   if(slug==='yes-no') state.yesNoCount=null;
   state.selected=[];
@@ -221,11 +224,16 @@ function updateDraw(){
 
 function openDraw(){
   if(!state.slug){
+    const promptError=$('#prompt-error');
+    if(promptError) promptError.textContent='먼저 보고 싶은 타로를 골라주세요.';
     $('#reading-pills').animate?.([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:260});
+    $('#reading-pills').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
 
   if(state.slug==='yes-no'&&!Number.isInteger(state.yesNoCount)){
+    const promptError=$('#prompt-error');
+    if(promptError) promptError.textContent='카드 수를 먼저 골라주세요.';
     const row=$('#context-row');
     row.classList.remove('needs-choice');
     void row.offsetWidth;
@@ -236,6 +244,8 @@ function openDraw(){
 
   const context=readingContexts[state.slug];
   if(context?.options?.length&&!state.contextKey){
+    const promptError=$('#prompt-error');
+    if(promptError) promptError.textContent=`${context.label} 항목을 먼저 골라주세요.`;
     const row=$('#context-row');
     row.classList.remove('needs-choice');
     void row.offsetWidth;
@@ -246,10 +256,14 @@ function openDraw(){
 
   state.question=$('#question-input').value.trim();
   state.required=requiredCount();
+  state.reusedDaily=false;
+  const promptError=$('#prompt-error');
+  if(promptError) promptError.textContent='';
 
   if(state.slug==='today'){
     const saved=loadDaily(localStorage);
     if(saved){
+      state.reusedDaily=true;
       state.selected=[{...saved,deckIndex:-1,placed:true}];
       state.required=1;
       showResult();
@@ -488,6 +502,13 @@ function showResult(){
   if(state.slug==='today'&&!loadDaily(localStorage)&&picks[0]) saveDaily(localStorage,picks[0]);
 
   $('#result-question').textContent=state.question?`“${state.question}”`:'';
+  const resultNotice=$('#result-notice');
+  if(resultNotice){
+    resultNotice.hidden=!(state.slug==='today'&&state.reusedDaily);
+    resultNotice.textContent=state.slug==='today'&&state.reusedDaily
+      ?'오늘의 카드는 이미 뽑았어요. 같은 브라우저에서는 오늘 하루 이 카드가 다시 보여요.'
+      :'';
+  }
   $('#revealed-cards').innerHTML=picks.map(resultCard).join('');
 
   const reading=readings[state.slug];
@@ -594,6 +615,54 @@ function showResult(){
   $('#revealed-cards img').forEach(img=>img.addEventListener('error',()=>{img.style.opacity=.08},{once:true}));
 }
 
+
+function shareText(){
+  const cardLines=state.selected.map((pick,index)=>{
+    const card=cardById(pick.id);
+    const position=readings[state.slug]?.positions[index]?.label||'카드';
+    return `${position}: ${card.koreanName} (${pick.reversed?'역방향':'정방향'})`;
+  });
+  const summary=$('#summary-copy')?.innerText.trim();
+  return [
+    'The Reading Room',
+    readings[state.slug]?.name||'타로 리딩',
+    state.question?`질문: ${state.question}`:null,
+    ...cardLines,
+    summary?`\n${summary}`:null
+  ].filter(Boolean).join('\n');
+}
+
+async function copyResult(){
+  const feedback=$('#share-feedback');
+  try{
+    await navigator.clipboard.writeText(shareText());
+    if(feedback) feedback.textContent='결과를 복사했어요.';
+  }catch{
+    if(feedback) feedback.textContent='복사하지 못했어요. 다시 시도해 주세요.';
+  }
+}
+
+async function shareResult(){
+  const feedback=$('#share-feedback');
+  const url=`${location.origin}/tarot/${state.slug}/`;
+  const data={title:`${readings[state.slug]?.name||'타로 리딩'} · The Reading Room`,text:shareText(),url};
+  if(navigator.share){
+    try{
+      await navigator.share(data);
+      if(feedback) feedback.textContent='공유했어요.';
+      return;
+    }catch(error){
+      if(error?.name==='AbortError') return;
+    }
+  }
+  try{
+    await navigator.clipboard.writeText(`${data.text}\n\n${url}`);
+    if(feedback) feedback.textContent='공유 링크와 결과를 복사했어요.';
+  }catch{
+    if(feedback) feedback.textContent='공유하지 못했어요. 다시 시도해 주세요.';
+  }
+}
+
 function reset(){
   state.slug=null;
   state.question='';
@@ -602,7 +671,12 @@ function reset(){
   state.selected=[];
   state.required=0;
   state.yesNoCount=null;
+  state.reusedDaily=false;
   $('#question-input').value='';
+  const shareFeedback=$('#share-feedback');
+  if(shareFeedback) shareFeedback.textContent='';
+  const resultNotice=$('#result-notice');
+  if(resultNotice){resultNotice.hidden=true;resultNotice.textContent='';}
   $('#reveal-button').classList.remove('is-ready');
   $('#draw-area').hidden=true;
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
@@ -620,10 +694,16 @@ function installDeckDrag(){
   let down=false,startX=0,startScroll=0;
 
   browser.addEventListener('wheel',event=>{
-    const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
-    if(!delta) return;
-    event.preventDefault();
-    browser.scrollLeft+=delta;
+    const horizontal=Math.abs(event.deltaX)>Math.abs(event.deltaY);
+    if(horizontal&&event.deltaX){
+      event.preventDefault();
+      browser.scrollLeft+=event.deltaX;
+      return;
+    }
+    if(event.shiftKey&&event.deltaY){
+      event.preventDefault();
+      browser.scrollLeft+=event.deltaY;
+    }
   },{passive:false});
 
   browser.addEventListener('pointerdown',event=>{
@@ -652,7 +732,12 @@ function installHeroTilt(){
   const host=$('.floating-deck-wrap');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 
-  host.addEventListener('pointermove',event=>{
+  let frame=0;
+  let latestEvent=null;
+  const render=()=>{
+    frame=0;
+    if(!latestEvent)return;
+    const event=latestEvent;
     const r=host.getBoundingClientRect();
     const nx=(event.clientX-r.left)/r.width-.5;
     const ny=(event.clientY-r.top)/r.height-.5;
@@ -671,9 +756,16 @@ function installHeroTilt(){
     const fanZoneX=Math.min(165,r.width*.22);
     const fanZoneY=118;
     deck.classList.toggle('is-fanned',Math.abs(dx)<fanZoneX&&Math.abs(dy)<fanZoneY);
+  };
+
+  host.addEventListener('pointermove',event=>{
+    latestEvent=event;
+    if(!frame)frame=requestAnimationFrame(render);
   });
 
   host.addEventListener('pointerleave',()=>{
+    latestEvent=null;
+    if(frame){cancelAnimationFrame(frame);frame=0}
     deck.classList.remove('is-fanned');
     deck.style.transform='';
     deck.style.animation='';
@@ -690,7 +782,9 @@ document.addEventListener('click',e=>{
     reset,
     'clear-reading':clearReading,
     reshuffle,
-    reveal:showResult
+    reveal:showResult,
+    share:shareResult,
+    copy:copyResult
   })[action]?.();
 });
 
