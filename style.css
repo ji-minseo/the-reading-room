@@ -1232,3 +1232,9 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   .share-action-item{flex:1 1 0}
   .share-action-item .ghost-button{width:100%}
 }
+
+/* Korean readability: wrap at word boundaries instead of splitting syllables. */
+body{
+  word-break:keep-all;
+  overflow-wrap:break-word;
+}
