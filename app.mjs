@@ -4,7 +4,7 @@ import {readingContexts} from './core/data/reading-contexts.mjs';
 import {cardSlug} from './core/data/card-directory.mjs';
 import {
   shuffleDeck, interpret, synthesis, verdict, contextualInsight, loadDaily, saveDaily,
-  readingHeadline, timingInsight, nextAction, combinationInsights, generalAdvice
+  readingHeadline, timingInsight, nextAction, combinationInsights, generalAdvice, withParticle
 } from './core/engine.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
@@ -596,12 +596,12 @@ function renderInterpretations(picks){
     const pick=picks[0];
     const card=cardById(pick.id);
     const keywordPhrase=card.keywords.join(' · ');
-    const keywordParticle=keywordPhrase==='상실 · 애도'?'를':'을';
+    const keywordWithParticle=withParticle(`‘${keywordPhrase}’`,'을/를');
     $('#interpretations').innerHTML=`
       <section class="daily-reading-grid">
         ${[
-          ['오늘의 전체 흐름',`‘${keywordPhrase}’${keywordParticle} 오늘의 관점으로 삼아보세요. ${pick.reversed?card.reversed:card.upright}로 읽을 수 있습니다.`],
-          ['연애',pick.reversed?`오늘은 ${card.reversed}로 읽습니다. ${card.advice}`:card.love],
+          ['오늘의 전체 흐름',`${keywordWithParticle} 오늘의 관점으로 삼아보세요. ${withParticle(pick.reversed?card.reversed:card.upright,'으로/로')} 읽을 수 있습니다.`],
+          ['연애',pick.reversed?`오늘은 ${withParticle(card.reversed,'으로/로')} 읽습니다. ${card.advice}`:card.love],
           ['일 / 학업',`${generalAdvice(card,pick.reversed)} 업무나 공부에서는 이 조언을 오늘 끝낼 작은 과제 하나에 적용해 보세요.`],
           ['금전',`‘${card.keywords[0]}’ 키워드가 나의 소비 태도와 어떻게 닿는지 돌아보세요. 수익이나 손실의 예고가 아니며, 지출은 실제 예산을 확인한 뒤 결정하세요.`],
           ['오늘의 조언',generalAdvice(card,pick.reversed)]
