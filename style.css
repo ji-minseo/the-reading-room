@@ -1087,3 +1087,50 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   color:var(--wine-dark)!important;
   text-decoration:none!important;
 }
+
+.prompt-error{
+  min-height:18px;
+  margin:8px 4px 0;
+  color:var(--wine);
+  font-size:10px;
+  line-height:1.6;
+}
+.result-notice{
+  max-width:820px;
+  margin:0 auto 18px;
+  padding:11px 13px;
+  border:1px solid rgba(107,42,57,.16);
+  border-radius:12px;
+  background:rgba(107,42,57,.055);
+  color:var(--wine-dark);
+  font-size:10px;
+  line-height:1.7;
+}
+.result-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.share-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.share-feedback{
+  min-height:18px;
+  max-width:820px;
+  margin:8px auto 0;
+  color:var(--muted);
+  font-size:9px;
+  text-align:right;
+}
+@media(max-width:650px){
+  .result-actions{align-items:stretch}
+  .share-actions{width:100%}
+  .share-actions .ghost-button{flex:1 1 0}
+  .result-actions>.reveal-button{width:100%}
+  .share-feedback{text-align:left}
+}
