@@ -48,6 +48,20 @@ function renderSelectedReading(){
 
 function renderContext(){
   const row=$('#context-row');
+
+  if(state.slug==='yes-no'){
+    row.hidden=false;
+    $('#context-label').textContent='카드 수';
+    $('#context-options').innerHTML=[
+      [1,'1장 · 핵심'],
+      [2,'2장 · 조건까지'],
+      [3,'3장 · 조언까지']
+    ].map(([count,label])=>
+      `<button class="context-pill ${state.yesNoCount===count?'is-selected':''}" type="button" data-count="${count}">${label}</button>`
+    ).join('');
+    return;
+  }
+
   const context=state.slug?readingContexts[state.slug]:null;
   if(!context?.options?.length){
     row.hidden=true;
@@ -55,7 +69,7 @@ function renderContext(){
     $('#context-options').innerHTML='';
     return;
   }
-  if(!state.contextKey||!context.options.some(([key])=>key===state.contextKey)) state.contextKey=context.options[0][0];
+
   row.hidden=false;
   $('#context-label').textContent=context.label;
   $('#context-options').innerHTML=context.options.map(([key,label])=>
@@ -67,6 +81,7 @@ function chooseReading(slug){
   if(!readings[slug]) return;
   state.slug=slug;
   state.contextKey=null;
+  if(slug==='yes-no') state.yesNoCount=3;
   state.selected=[];
   state.deck=[];
   state.required=requiredCount();
@@ -318,7 +333,15 @@ document.addEventListener('click',e=>{
   const context=e.target.closest('[data-context]');
   if(context){
     state.contextKey=context.dataset.context;
-    $$('.context-pill').forEach(btn=>btn.classList.toggle('is-selected',btn===context));
+    $('.context-pill').forEach(btn=>btn.classList.toggle('is-selected',btn===context));
+    return;
+  }
+
+  const count=e.target.closest('[data-count]');
+  if(count){
+    state.yesNoCount=Number(count.dataset.count);
+    state.required=state.yesNoCount;
+    renderContext();
     return;
   }
 
