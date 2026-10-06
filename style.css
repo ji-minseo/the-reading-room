@@ -464,3 +464,99 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
     transform:none!important;
   }
 }
+
+/* Motion pass v3 — stronger fan, shuffle, and clean placed cards. */
+.deck-browser{
+  padding-top:64px;
+  padding-bottom:42px;
+}
+.position-slot.is-filled .position-placeholder.has-front{
+  background:#f2eadc!important;
+  background-image:none!important;
+  border:1px solid #baa28a!important;
+  color:transparent;
+  box-shadow:0 9px 20px rgba(60,35,36,.13);
+}
+.position-slot.is-filled .position-placeholder.has-front img{
+  position:relative;
+  z-index:2;
+}
+.draw-area.is-entering .deck-track{
+  opacity:1;
+  transform:none;
+}
+.draw-area.is-ready .deck-card{
+  animation:roomDeckFanStrong .82s cubic-bezier(.16,.78,.2,1) backwards;
+  animation-delay:var(--deal-delay,0ms);
+}
+@keyframes roomDeckFanStrong{
+  0%{
+    opacity:0;
+    transform:
+      translate3d(var(--stack-shift,0px),34px,0)
+      scale(.78)
+      rotate(var(--stack-rotate,0deg));
+    filter:saturate(.58) brightness(.96);
+  }
+  34%{
+    opacity:1;
+    transform:
+      translate3d(calc(var(--stack-shift,0px) * .96),5px,0)
+      scale(.9)
+      rotate(calc(var(--stack-rotate,0deg) * .85));
+    filter:saturate(.78);
+  }
+  76%{
+    opacity:1;
+    transform:
+      translate3d(calc(var(--stack-shift,0px) * -.035),-7px,0)
+      scale(1.025)
+      rotate(calc(var(--stack-rotate,0deg) * -.05));
+    filter:none;
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1) rotate(0);
+    filter:none;
+  }
+}
+.deck-track.is-shuffling .deck-card{
+  animation-duration:.76s!important;
+  animation-timing-function:cubic-bezier(.2,.74,.22,1)!important;
+  animation-fill-mode:both!important;
+  animation-delay:var(--shuffle-delay,0ms)!important;
+}
+.deck-track.is-shuffling .deck-card:nth-child(odd){
+  animation-name:roomShuffleLeft!important;
+}
+.deck-track.is-shuffling .deck-card:nth-child(even){
+  animation-name:roomShuffleRight!important;
+}
+@keyframes roomShuffleLeft{
+  0%{transform:translate3d(0,0,0) rotate(0) scale(1)}
+  22%{transform:translate3d(-34px,-18px,0) rotate(-9deg) scale(1.035)}
+  48%{transform:translate3d(30px,7px,0) rotate(7deg) scale(.98)}
+  70%{transform:translate3d(-17px,-5px,0) rotate(-4deg) scale(1.012)}
+  100%{transform:translate3d(0,0,0) rotate(0) scale(1)}
+}
+@keyframes roomShuffleRight{
+  0%{transform:translate3d(0,0,0) rotate(0) scale(1)}
+  22%{transform:translate3d(34px,-20px,0) rotate(9deg) scale(1.04)}
+  48%{transform:translate3d(-31px,8px,0) rotate(-7deg) scale(.978)}
+  70%{transform:translate3d(18px,-6px,0) rotate(4deg) scale(1.012)}
+  100%{transform:translate3d(0,0,0) rotate(0) scale(1)}
+}
+.deck-track.is-shuffling{
+  animation:deckPackPulse .76s cubic-bezier(.2,.74,.22,1) both;
+}
+@keyframes deckPackPulse{
+  0%,100%{transform:scaleX(1) scaleY(1)}
+  28%{transform:scaleX(.9) scaleY(1.02)}
+  52%{transform:scaleX(1.035) scaleY(.985)}
+  74%{transform:scaleX(.965) scaleY(1.01)}
+}
+@media(max-width:650px){
+  .deck-browser{padding-top:56px}
+  .draw-area.is-ready .deck-card{animation-duration:.7s}
+  .deck-track.is-shuffling .deck-card{animation-duration:.66s!important}
+}
