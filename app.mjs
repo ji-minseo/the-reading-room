@@ -568,7 +568,7 @@ function showResult(){
   const related=(readings[state.slug]?.related||[]).filter(slug=>readings[slug]);
   $('#result-discovery').innerHTML=`
     <div class="result-discovery-head"><span>KEEP READING</span><h3>다른 타로도 이어서 볼까요?</h3></div>
-    <div class="result-reading-links">${related.map(slug=>`<a href="/?reading=${slug}"><strong>${readings[slug].name}</strong><span>${readings[slug].tagline}</span></a>`).join('')}</div>
+    <div class="result-reading-links">${related.map(slug=>`<a href="/tarot/${slug}/"><strong>${readings[slug].name}</strong><span>${readings[slug].tagline}</span></a>`).join('')}</div>
     <div class="result-card-links"><span>방금 뽑은 카드 뜻 더 보기</span><div>${picks.map(pick=>{const card=cardById(pick.id);return `<a href="/cards/${cardSlug(card)}/">${card.koreanName} <small>${card.name}</small></a>`}).join('')}</div></div>
     <a class="result-library-link" href="/cards/">타로 카드 78장 전체 보기 →</a>
   `;
