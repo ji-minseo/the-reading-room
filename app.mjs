@@ -164,15 +164,16 @@ function buildDeck(){
     const y=(Math.abs(t)*13).toFixed(1);
     const picked=state.selected.some(item=>item.deckIndex===index);
     const distance=Math.abs(index-middle);
-    const dealDelay=Math.round(distance*14);
-    const spreadShift=(-t*120).toFixed(1);
-    const entryRotate=(t*7).toFixed(2);
+    const dealDelay=Math.round(distance*7);
+    const stackShift=(-(index-middle)*41).toFixed(1);
+    const stackRotate=(t*14).toFixed(2);
+    const shuffleDelay=Math.round((index%6)*12);
     return `
       <button
         class="deck-card ${picked?'is-selected':''}"
         type="button"
         data-deck-index="${index}"
-        style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms;--spread-shift:${spreadShift}px;--entry-rotate:${entryRotate}deg"
+        style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms;--stack-shift:${stackShift}px;--stack-rotate:${stackRotate}deg;--shuffle-delay:${shuffleDelay}ms"
         aria-label="뒤집힌 카드 ${index+1}">
         <span class="deck-card-inner"></span>
       </button>
@@ -339,20 +340,40 @@ function unpick(index){
 function reshuffle(){
   if(!state.slug) return;
   const draw=$('#draw-area');
-  draw.classList.remove('is-ready');
-  draw.classList.add('is-entering');
-  window.setTimeout(()=>{
+  const track=$('#deck-track');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if(reduced){
     state.deck=shuffleDeck();
     state.selected=[];
     buildDeck();
     updateDraw();
+    return;
+  }
+
+  draw.classList.add('is-ready');
+  track.classList.remove('is-shuffling');
+  void track.offsetWidth;
+  track.classList.add('is-shuffling');
+
+  window.setTimeout(()=>{
+    track.classList.remove('is-shuffling');
+    draw.classList.remove('is-ready');
+    draw.classList.add('is-entering');
+
+    state.deck=shuffleDeck();
+    state.selected=[];
+    buildDeck();
+    updateDraw();
+
     const browser=$('#deck-browser');
     browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
+
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       draw.classList.remove('is-entering');
       draw.classList.add('is-ready');
     }));
-  },180);
+  },820);
 }
 
 function resultCard(pick,index){
