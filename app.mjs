@@ -92,12 +92,36 @@ function restoreReadingSnapshot(snapshot){
 }
 
 const artworkAnchors={'major-0':'fool','major-6':'lovers','major-16':'tower','major-18':'moon','major-19':'sun'};
-const artworkBase='https://pickacard.everytinytool.com/artwork';
+const artworkBase='/artwork';
 const order=[...primary,...secondary,...tertiary].filter(slug=>readings[slug]);
 
 function cardById(id){return cards.find(c=>c.id===id)}
 function artworkFile(card){return artworkAnchors[card.id]||card.id}
 function artworkUrl(card){return `${artworkBase}/${artworkFile(card)}.webp`}
+
+const preloadedArtwork=new Set();
+let artworkWarmStarted=false;
+function preloadCardArtwork(card){
+  if(!card)return;
+  const url=artworkUrl(card);
+  if(preloadedArtwork.has(url))return;
+  preloadedArtwork.add(url);
+  const img=new Image();
+  img.decoding='async';
+  try{img.fetchPriority='low'}catch{}
+  img.src=url;
+}
+function warmArtworkCache(){
+  if(artworkWarmStarted)return;
+  artworkWarmStarted=true;
+  const queue=[...cards];
+  const pump=()=>{
+    queue.splice(0,6).forEach(preloadCardArtwork);
+    if(queue.length)window.setTimeout(pump,120);
+  };
+  if('requestIdleCallback' in window)requestIdleCallback(pump,{timeout:900});
+  else window.setTimeout(pump,320);
+}
 function requiredCount(){
   if(state.slug==='yes-no') return state.yesNoCount||1;
   return readings[state.slug]?.positions.length||1;
@@ -211,6 +235,7 @@ function chooseReading(slug,{syncHistory=true}={}){
   $('#result-area').classList.remove('is-entering');
   const context=readingContexts[slug];
   if(syncHistory) syncReadingHistory('prompt','replace');
+  warmArtworkCache();
   if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!context?.options?.length&&slug!=='yes-no'){
     requestAnimationFrame(()=>$('#question-input').focus());
   }
@@ -487,6 +512,7 @@ function pickCard(index){
   if(state.selected.some(item=>item.deckIndex===index)) return;
   const pick=state.deck[index];
   if(!pick) return;
+  preloadCardArtwork(cardById(pick.id));
 
   const slotIndex=state.selected.length;
   const button=$(`[data-deck-index="${index}"]`);
