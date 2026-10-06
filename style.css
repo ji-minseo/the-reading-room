@@ -591,3 +591,10 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 @media(max-width:650px){
   .position-slot p{min-height:24px}
 }
+
+/* Give Korean section titles a stronger sans-serif hierarchy. */
+.draw-head h2,
+.result-head h2,
+.interpretation-body h3{
+  font-weight:700;
+}
