@@ -42,11 +42,6 @@
 
       <div class="reading-pills" id="reading-pills" aria-label="리딩 선택"></div>
 
-      <div class="context-row" id="context-row" hidden>
-        <span id="context-label"></span>
-        <div id="context-options" class="context-pills"></div>
-      </div>
-
       <form class="prompt-box" id="prompt-form">
         <div class="selected-reading" id="selected-reading" hidden></div>
         <textarea id="question-input" rows="2" maxlength="160" aria-label="타로 질문" placeholder="무엇이 궁금한가요?"></textarea>
@@ -59,6 +54,11 @@
           <button class="ask-button" type="submit" aria-label="카드 뽑기 시작">↑</button>
         </div>
       </form>
+
+      <div class="context-row" id="context-row" hidden>
+        <span id="context-label"></span>
+        <div id="context-options" class="context-pills"></div>
+      </div>
 
       <section class="draw-area" id="draw-area" hidden aria-live="polite">
         <div class="draw-head">
