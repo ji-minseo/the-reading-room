@@ -849,25 +849,20 @@ function reset(){
 
 function installDeckDrag(){
   const browser=$('#deck-browser');
-  let down=false,startX=0,startScroll=0;
+  let down=false,startX=0,startScroll=0,moved=false;
 
   browser.addEventListener('wheel',event=>{
-    const horizontal=Math.abs(event.deltaX)>Math.abs(event.deltaY);
-    if(horizontal&&event.deltaX){
-      event.preventDefault();
-      browser.scrollLeft+=event.deltaX;
-      return;
-    }
-    if(event.shiftKey&&event.deltaY){
-      event.preventDefault();
-      browser.scrollLeft+=event.deltaY;
-    }
+    const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
+    if(!delta) return;
+    event.preventDefault();
+    browser.scrollLeft+=delta;
   },{passive:false});
 
   browser.addEventListener('pointerdown',event=>{
-    if(event.target.closest('.deck-card')) return;
     if(event.pointerType==='touch') return;
+    if(event.button!==0) return;
     down=true;
+    moved=false;
     startX=event.clientX;
     startScroll=browser.scrollLeft;
     browser.classList.add('is-dragging');
@@ -875,15 +870,32 @@ function installDeckDrag(){
 
   window.addEventListener('pointermove',event=>{
     if(!down) return;
-    browser.scrollLeft=startScroll-(event.clientX-startX);
-  });
+    const dx=event.clientX-startX;
+    if(Math.abs(dx)>5) moved=true;
+    if(moved){
+      event.preventDefault();
+      browser.scrollLeft=startScroll-dx;
+    }
+  },{passive:false});
 
   const end=()=>{
+    if(!down) return;
     down=false;
     browser.classList.remove('is-dragging');
+    if(moved){
+      browser.dataset.suppressClick='1';
+      window.setTimeout(()=>delete browser.dataset.suppressClick,0);
+    }
   };
   window.addEventListener('pointerup',end);
   window.addEventListener('pointercancel',end);
+
+  browser.addEventListener('click',event=>{
+    if(browser.dataset.suppressClick==='1'){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  },true);
 }
 function installHeroTilt(){
   const deck=$('#floating-deck');
