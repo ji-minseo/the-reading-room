@@ -22,6 +22,75 @@ const state={
   deckFocusIndex:0
 };
 
+const sessionKey='reading-room-session-v1';
+
+function readingSnapshot(screen='prompt'){
+  return {
+    screen,
+    slug:state.slug,
+    question:state.question,
+    contextKey:state.contextKey,
+    deck:state.deck,
+    selected:state.selected,
+    required:state.required,
+    yesNoCount:state.yesNoCount,
+    reusedDaily:state.reusedDaily,
+    deckFocusIndex:state.deckFocusIndex
+  };
+}
+function readingUrl(){
+  return state.slug?`/?reading=${encodeURIComponent(state.slug)}`:'/';
+}
+function saveReadingSession(screen='prompt'){
+  try{sessionStorage.setItem(sessionKey,JSON.stringify(readingSnapshot(screen)))}catch{}
+}
+function clearReadingSession(){
+  try{sessionStorage.removeItem(sessionKey)}catch{}
+}
+function syncReadingHistory(screen='prompt',mode='replace'){
+  const snapshot=readingSnapshot(screen);
+  const method=mode==='push'?'pushState':'replaceState';
+  history[method]({readingRoom:true,snapshot},'',readingUrl());
+  saveReadingSession(screen);
+}
+function loadReadingSession(){
+  try{
+    const parsed=JSON.parse(sessionStorage.getItem(sessionKey)||'null');
+    return parsed&&readings[parsed.slug]?parsed:null;
+  }catch{return null}
+}
+function restoreReadingSnapshot(snapshot){
+  if(!snapshot||!readings[snapshot.slug])return false;
+  state.slug=snapshot.slug;
+  state.question=snapshot.question||'';
+  state.contextKey=snapshot.contextKey||null;
+  state.deck=Array.isArray(snapshot.deck)?snapshot.deck:[];
+  state.selected=Array.isArray(snapshot.selected)?snapshot.selected:[];
+  state.required=Number(snapshot.required)||requiredCount();
+  state.yesNoCount=Number.isInteger(snapshot.yesNoCount)?snapshot.yesNoCount:null;
+  state.reusedDaily=Boolean(snapshot.reusedDaily);
+  state.deckFocusIndex=Number.isInteger(snapshot.deckFocusIndex)?snapshot.deckFocusIndex:0;
+
+  $('#question-input').value=state.question;
+  renderReadingPills();
+  renderSelectedReading();
+  renderContext();
+  updatePromptGlow();
+
+  $('#draw-area').hidden=true;
+  $('#result-area').hidden=true;
+  if(snapshot.screen==='draw'&&state.deck.length){
+    buildDeck();
+    updateDraw();
+    $('#draw-area').hidden=false;
+    $('#draw-area').classList.add('is-ready');
+  }else if(snapshot.screen==='result'&&state.selected.length===state.required){
+    state.selected=state.selected.map(item=>({...item,placed:true}));
+    showResult({skipHistory:true,immediate:true});
+  }
+  return true;
+}
+
 const artworkAnchors={'major-0':'fool','major-6':'lovers','major-16':'tower','major-18':'moon','major-19':'sun'};
 const artworkBase='https://pickacard.everytinytool.com/artwork';
 const order=[...primary,...secondary,...tertiary].filter(slug=>readings[slug]);
@@ -70,6 +139,7 @@ function wireContextPills(){
       $$('#context-options [data-context]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
       updatePromptGlow();
+      syncReadingHistory('prompt','replace');
       if(matchMedia('(hover:hover) and (pointer:fine)').matches) requestAnimationFrame(()=>$('#question-input').focus());
     };
   });
@@ -80,6 +150,7 @@ function wireContextPills(){
       $$('#context-options [data-count]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
       updatePromptGlow();
+      syncReadingHistory('prompt','replace');
       if(matchMedia('(hover:hover) and (pointer:fine)').matches) requestAnimationFrame(()=>$('#question-input').focus());
     };
   });
@@ -120,7 +191,7 @@ function renderContext(){
   wireContextPills();
   updatePromptGlow();
 }
-function chooseReading(slug){
+function chooseReading(slug,{syncHistory=true}={}){
   if(!readings[slug]) return;
   state.slug=slug;
   const promptError=$('#prompt-error');
@@ -139,6 +210,7 @@ function chooseReading(slug){
   $('#result-area').hidden=true;
   $('#result-area').classList.remove('is-entering');
   const context=readingContexts[slug];
+  if(syncHistory) syncReadingHistory('prompt','replace');
   if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!context?.options?.length&&slug!=='yes-no'){
     requestAnimationFrame(()=>$('#question-input').focus());
   }
@@ -157,6 +229,8 @@ function clearReading(){
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
   $('#result-area').classList.remove('is-entering');
+  clearReadingSession();
+  history.replaceState({readingRoom:true,snapshot:readingSnapshot('prompt')},'','/');
 }
 
 function buildPositionRail(){
@@ -326,6 +400,7 @@ function openDraw(){
     const browser=$('#deck-browser');
     browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
     draw.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    syncReadingHistory('draw','push');
   }));
 }
 function animatePickToSlot(button,slot,pick){
@@ -346,6 +421,7 @@ function animatePickToSlot(button,slot,pick){
     next?.classList.add('is-next');
     button?.classList.remove('is-launching');
     button?.classList.add('is-selected');
+    if(state.slug) syncReadingHistory('draw','replace');
   };
 
   if(slot) slot.classList.add('is-receiving');
@@ -441,6 +517,7 @@ function reshuffle(){
     state.deckFocusIndex=Math.floor((state.deck.length-1)/2);
     buildDeck();
     updateDraw();
+    syncReadingHistory('draw','replace');
     return;
   }
 
@@ -459,6 +536,7 @@ function reshuffle(){
     state.deckFocusIndex=Math.floor((state.deck.length-1)/2);
     buildDeck();
     updateDraw();
+    syncReadingHistory('draw','replace');
 
     const browser=$('#deck-browser');
     browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
@@ -541,7 +619,7 @@ function renderInterpretations(picks){
   }).join('');
 }
 
-function showResult(){
+function showResult(options={}){
   if(state.selected.length!==state.required||!state.selected.every(item=>item.placed!==false)) return;
   const picks=state.selected.map(({id,reversed})=>({id,reversed}));
 
@@ -642,6 +720,9 @@ function showResult(){
     <a class="result-library-link" href="/cards/">타로 카드 78장 전체 보기 →</a>
   `;
 
+  if(!options.skipHistory) syncReadingHistory('result','push');
+  else saveReadingSession('result');
+
   const draw=$('#draw-area');
   const result=$('#result-area');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -654,7 +735,7 @@ function showResult(){
     result.classList.add('is-entering');
     requestAnimationFrame(()=>result.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'}));
   };
-  if(reduced) enter();
+  if(reduced||options.immediate) enter();
   else{
     draw.classList.add('is-leaving');
     window.setTimeout(enter,320);
@@ -735,6 +816,8 @@ function reset(){
   renderSelectedReading();
   renderContext();
   updatePromptGlow();
+  clearReadingSession();
+  history.replaceState({readingRoom:true,snapshot:readingSnapshot('prompt')},'','/');
   window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 
@@ -854,7 +937,28 @@ installDeckDrag();
 installHeroTilt();
 
 const initialReading=new URLSearchParams(window.location.search).get('reading');
-if(initialReading&&readings[initialReading]){
+const navigationType=performance.getEntriesByType?.('navigation')?.[0]?.type;
+const savedSession=navigationType==='reload'?loadReadingSession():null;
+
+if(savedSession&&restoreReadingSnapshot(savedSession)){
+  history.replaceState({readingRoom:true,snapshot:readingSnapshot(savedSession.screen||'prompt')},'',readingUrl());
+}else if(initialReading&&readings[initialReading]){
   chooseReading(initialReading);
   requestAnimationFrame(()=>$('#prompt-form').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'}));
+}else{
+  history.replaceState({readingRoom:true,snapshot:readingSnapshot('prompt')},'','/');
 }
+
+window.addEventListener('popstate',event=>{
+  const snapshot=event.state?.readingRoom?event.state.snapshot:null;
+  if(snapshot&&restoreReadingSnapshot(snapshot)){
+    requestAnimationFrame(()=>{
+      const target=snapshot.screen==='result'?$('#result-area'):snapshot.screen==='draw'?$('#draw-area'):$('#prompt-form');
+      target?.scrollIntoView({behavior:'auto',block:'start'});
+    });
+    return;
+  }
+  const slug=new URLSearchParams(window.location.search).get('reading');
+  if(slug&&readings[slug])chooseReading(slug,{syncHistory:false});
+  else reset();
+});
