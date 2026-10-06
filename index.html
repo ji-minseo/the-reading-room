@@ -71,12 +71,12 @@
         <div id="context-options" class="context-pills"></div>
       </div>
 
-      <section class="draw-area" id="draw-area" hidden aria-live="polite">
+      <section class="draw-area" id="draw-area" hidden>
         <div class="draw-head">
           <div>
             <p class="kicker">CHOOSE YOUR CARDS</p>
             <h2 id="draw-title">마음이 가는 카드를 골라주세요.</h2>
-            <p id="draw-note">카드를 훑어보다가 끌리는 순간 눌러보세요.</p>
+            <p id="draw-note" role="status" aria-live="polite" aria-atomic="true">카드를 훑어보다가 끌리는 순간 눌러보세요.</p>
           </div>
           <div class="draw-count"><b id="selected-count">0</b><span>/</span><b id="required-count">3</b></div>
         </div>
@@ -109,7 +109,10 @@
           <div class="yesno-result" id="yesno-result" hidden></div>
         </article>
 
-        <div class="interpretations" id="interpretations"></div>
+        <details class="interpretation-disclosure" id="interpretation-disclosure">
+          <summary><span>카드별 상세 해석 보기</span><small>각 위치의 의미와 조언을 더 자세히 읽어보세요.</small></summary>
+          <div class="interpretations" id="interpretations"></div>
+        </details>
 
         <section class="result-discovery" id="result-discovery"></section>
 
