@@ -612,7 +612,7 @@ function showResult(){
     window.setTimeout(enter,320);
   }
 
-  $('#revealed-cards img').forEach(img=>img.addEventListener('error',()=>{img.style.opacity=.08},{once:true}));
+  $$('#revealed-cards img').forEach(img=>img.addEventListener('error',()=>{img.style.opacity=.08},{once:true}));
 }
 
 
