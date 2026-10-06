@@ -110,8 +110,8 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 }
 .ask-button:hover{background:var(--wine-dark);transform:translateY(-1px)}
 .context-row{
-  max-width:760px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
-  color:var(--muted);font-size:10px;animation:subPillsIn .22s ease both;
+  max-width:760px;margin:12px auto 0;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  color:var(--muted);font-size:10px;animation:subPillsIn .24s cubic-bezier(.2,.7,.2,1) both;
 }
 @keyframes subPillsIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 #context-label{font-size:9px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
@@ -262,4 +262,128 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
   .floating-deck{animation:none}
+}
+
+.context-row.needs-choice{
+  animation:choiceNudge .32s ease both;
+}
+@keyframes choiceNudge{
+  0%,100%{transform:translateX(0)}
+  30%{transform:translateX(-5px)}
+  65%{transform:translateX(5px)}
+}
+.context-pill.is-selected{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(76,45,42,.07);
+}
+.draw-area.is-entering .draw-head,
+.draw-area.is-entering .position-rail,
+.draw-area.is-entering .deck-browser,
+.draw-area.is-entering .draw-actions{
+  opacity:0;
+  transform:translateY(12px);
+}
+.draw-area.is-ready .draw-head,
+.draw-area.is-ready .position-rail,
+.draw-area.is-ready .deck-browser,
+.draw-area.is-ready .draw-actions{
+  opacity:1;
+  transform:none;
+}
+.draw-head,.position-rail,.deck-browser,.draw-actions{
+  transition:opacity .46s ease,transform .58s cubic-bezier(.18,.76,.22,1);
+}
+.position-rail{transition-delay:.06s}
+.deck-browser{transition-delay:.13s}
+.draw-actions{transition-delay:.2s}
+.deck-card{
+  opacity:0;
+  transform:translateY(18px) scale(.97);
+}
+.draw-area.is-ready .deck-card{
+  opacity:1;
+  transform:none;
+  transition:
+    transform .25s cubic-bezier(.2,.72,.25,1),
+    opacity .42s ease;
+  transition-delay:var(--deal-delay,0ms);
+}
+.draw-area.is-ready .deck-card:hover,
+.draw-area.is-ready .deck-card:focus-visible{
+  transform:translateY(-17px) scale(1.035);
+}
+.deck-card.is-launching{
+  z-index:20;
+  pointer-events:none;
+}
+.deck-card.is-launching .deck-card-inner{
+  filter:brightness(1.03);
+}
+.position-slot.is-receiving .position-placeholder{
+  border-style:solid;
+  border-color:rgba(107,42,57,.48);
+  box-shadow:0 0 0 6px rgba(107,42,57,.055);
+  transform:translateY(-4px) scale(1.025);
+}
+.position-slot.is-filled .position-placeholder{
+  animation:slotSettle .42s cubic-bezier(.2,.72,.25,1) both;
+}
+@keyframes slotSettle{
+  0%{transform:translateY(-8px) scale(1.04)}
+  70%{transform:translateY(-1px) scale(.99)}
+  100%{transform:translateY(-3px) scale(1)}
+}
+.table-flying-card{
+  position:fixed;
+  z-index:140;
+  pointer-events:none;
+  perspective:1000px;
+  transform-origin:center;
+}
+.flight-card-inner{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+}
+.flight-card-back,.flight-card-front{
+  position:absolute;inset:0;border-radius:8px;overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+.flight-card-back{
+  background:#632b3b url('https://pickacard.everytinytool.com/artwork/card-back.svg') center/100% 100% no-repeat;
+  border:1px solid #632b3b;
+  box-shadow:0 16px 34px rgba(55,31,32,.18);
+}
+.flight-card-front{
+  transform:rotateY(180deg);
+  background:#f2eadc;
+  border:1px solid #baa28a;
+  padding:4px;
+  box-shadow:0 16px 34px rgba(55,31,32,.18);
+}
+.flight-card-front img{
+  width:100%;height:100%;display:block;object-fit:cover;mix-blend-mode:multiply;
+}
+.flight-card-front img.is-reversed{transform:rotate(180deg)}
+.position-placeholder.has-front{
+  background:#f2eadc;
+  border:1px solid #baa28a;
+  padding:3px;
+  overflow:hidden;
+  color:transparent;
+}
+.position-placeholder.has-front img{
+  width:100%;height:100%;display:block;object-fit:cover;mix-blend-mode:multiply;
+}
+.position-placeholder.has-front img.is-reversed{transform:rotate(180deg)}
+.draw-area.is-leaving{
+  opacity:0;
+  transform:translateY(-10px) scale(.995);
+  transition:opacity .34s ease,transform .44s cubic-bezier(.22,.7,.2,1);
+}
+.result-area.is-entering{
+  animation:resultEnter .78s cubic-bezier(.18,.76,.22,1) both;
+}
+@keyframes resultEnter{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:none}
 }
