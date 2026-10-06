@@ -13,7 +13,7 @@ const state={
   deck:[],
   selected:[],
   required:0,
-  yesNoCount:3
+  yesNoCount:null
 };
 
 const artworkAnchors={'major-0':'fool','major-6':'lovers','major-16':'tower','major-18':'moon','major-19':'sun'};
@@ -24,8 +24,19 @@ function cardById(id){return cards.find(c=>c.id===id)}
 function artworkFile(card){return artworkAnchors[card.id]||card.id}
 function artworkUrl(card){return `${artworkBase}/${artworkFile(card)}.webp`}
 function requiredCount(){
-  if(state.slug==='yes-no') return state.yesNoCount;
+  if(state.slug==='yes-no') return state.yesNoCount||1;
   return readings[state.slug]?.positions.length||1;
+}
+
+function promptSelectionReady(){
+  if(!state.slug) return false;
+  if(state.slug==='yes-no') return Number.isInteger(state.yesNoCount);
+  const context=readingContexts[state.slug];
+  return context?.options?.length?Boolean(state.contextKey):true;
+}
+
+function updatePromptGlow(){
+  $('#prompt-form .ask-button')?.classList.toggle('is-ready',promptSelectionReady());
 }
 
 function renderReadingPills(){
@@ -52,6 +63,7 @@ function wireContextPills(){
       state.contextKey=button.dataset.context;
       $$('#context-options [data-context]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
+      updatePromptGlow();
     };
   });
   $$('#context-options [data-count]').forEach(button=>{
@@ -60,6 +72,7 @@ function wireContextPills(){
       state.required=state.yesNoCount;
       $$('#context-options [data-count]').forEach(node=>node.classList.toggle('is-selected',node===button));
       $('#context-row').classList.remove('needs-choice');
+      updatePromptGlow();
     };
   });
 }
@@ -78,6 +91,7 @@ function renderContext(){
       `<button class="context-pill ${state.yesNoCount===count?'is-selected':''}" type="button" data-count="${count}">${label}</button>`
     ).join('');
     wireContextPills();
+    updatePromptGlow();
     return;
   }
 
@@ -86,6 +100,7 @@ function renderContext(){
     row.hidden=true;
     state.contextKey=null;
     $('#context-options').innerHTML='';
+    updatePromptGlow();
     return;
   }
 
@@ -95,18 +110,20 @@ function renderContext(){
     `<button class="context-pill ${state.contextKey===key?'is-selected':''}" type="button" data-context="${key}">${label}</button>`
   ).join('');
   wireContextPills();
+  updatePromptGlow();
 }
 function chooseReading(slug){
   if(!readings[slug]) return;
   state.slug=slug;
   state.contextKey=null;
-  if(slug==='yes-no') state.yesNoCount=3;
+  if(slug==='yes-no') state.yesNoCount=null;
   state.selected=[];
   state.deck=[];
   state.required=requiredCount();
   renderReadingPills();
   renderSelectedReading();
   renderContext();
+  updatePromptGlow();
   $('#draw-area').hidden=true;
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
@@ -122,6 +139,7 @@ function clearReading(){
   renderReadingPills();
   renderSelectedReading();
   renderContext();
+  updatePromptGlow();
   $('#draw-area').hidden=true;
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
@@ -200,6 +218,15 @@ function updateDraw(){
 function openDraw(){
   if(!state.slug){
     $('#reading-pills').animate?.([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:260});
+    return;
+  }
+
+  if(state.slug==='yes-no'&&!Number.isInteger(state.yesNoCount)){
+    const row=$('#context-row');
+    row.classList.remove('needs-choice');
+    void row.offsetWidth;
+    row.classList.add('needs-choice');
+    row.scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
 
@@ -468,7 +495,7 @@ function reset(){
   state.deck=[];
   state.selected=[];
   state.required=0;
-  state.yesNoCount=3;
+  state.yesNoCount=null;
   $('#question-input').value='';
   $('#reveal-button').classList.remove('is-ready');
   $('#draw-area').hidden=true;
@@ -478,6 +505,7 @@ function reset(){
   renderReadingPills();
   renderSelectedReading();
   renderContext();
+  updatePromptGlow();
   window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 
@@ -552,5 +580,6 @@ $('#question-input').addEventListener('keydown',e=>{
 renderReadingPills();
 renderSelectedReading();
 renderContext();
+updatePromptGlow();
 installDeckDrag();
 installHeroTilt();
