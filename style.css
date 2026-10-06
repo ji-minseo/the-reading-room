@@ -638,3 +638,53 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   font-style:italic!important;
   font-weight:400;
 }
+
+/* Hero deck interaction — stronger pointer depth and hover fan. */
+.floating-deck{
+  will-change:transform;
+  transition:transform .14s cubic-bezier(.2,.72,.25,1);
+}
+.float-card{
+  will-change:transform;
+  transition:
+    transform .52s cubic-bezier(.16,.78,.2,1),
+    opacity .34s ease,
+    box-shadow .34s ease;
+}
+.floating-deck.is-fanned .float-card{
+  opacity:1;
+  box-shadow:0 16px 34px rgba(49,28,31,.18);
+}
+.floating-deck.is-fanned .c5{
+  transform:translate(-92px,18px) rotate(-22deg) translateZ(-8px);
+  transition-delay:0ms;
+}
+.floating-deck.is-fanned .c4{
+  transform:translate(-48px,2px) rotate(-11deg) translateZ(-4px);
+  transition-delay:45ms;
+}
+.floating-deck.is-fanned .c3{
+  transform:translate(0,-7px) rotate(0deg) translateZ(0);
+  transition-delay:90ms;
+}
+.floating-deck.is-fanned .c2{
+  transform:translate(48px,2px) rotate(11deg) translateZ(-4px);
+  transition-delay:135ms;
+}
+.floating-deck.is-fanned .c1{
+  transform:translate(92px,18px) rotate(22deg) translateZ(-8px);
+  transition-delay:180ms;
+}
+.floating-deck.is-fanned{
+  z-index:4;
+}
+@media(max-width:650px){
+  .floating-deck.is-fanned .c5{transform:translate(-68px,14px) rotate(-20deg) translateZ(-8px)}
+  .floating-deck.is-fanned .c4{transform:translate(-34px,2px) rotate(-10deg) translateZ(-4px)}
+  .floating-deck.is-fanned .c3{transform:translate(0,-5px) rotate(0deg)}
+  .floating-deck.is-fanned .c2{transform:translate(34px,2px) rotate(10deg) translateZ(-4px)}
+  .floating-deck.is-fanned .c1{transform:translate(68px,14px) rotate(20deg) translateZ(-8px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .floating-deck,.float-card{transition:none!important}
+}
