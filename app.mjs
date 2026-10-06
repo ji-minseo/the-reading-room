@@ -849,7 +849,7 @@ function reset(){
 
 function installDeckDrag(){
   const browser=$('#deck-browser');
-  let down=false,startX=0,startScroll=0;
+  let down=false,startX=0,startScroll=0,moved=false;
 
   browser.addEventListener('wheel',event=>{
     const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
@@ -862,6 +862,7 @@ function installDeckDrag(){
     if(event.pointerType==='touch') return;
     if(event.button!==0) return;
     down=true;
+    moved=false;
     startX=event.clientX;
     startScroll=browser.scrollLeft;
     browser.classList.add('is-dragging');
@@ -869,15 +870,30 @@ function installDeckDrag(){
 
   window.addEventListener('pointermove',event=>{
     if(!down) return;
-    browser.scrollLeft=startScroll-(event.clientX-startX);
+    const dx=event.clientX-startX;
+    if(!moved&&Math.abs(dx)>5) moved=true;
+    if(!moved) return;
+    browser.scrollLeft=startScroll-dx;
   });
 
   const end=()=>{
+    if(!down) return;
     down=false;
     browser.classList.remove('is-dragging');
+    if(moved){
+      browser.dataset.suppressClick='1';
+      requestAnimationFrame(()=>delete browser.dataset.suppressClick);
+    }
   };
   window.addEventListener('pointerup',end);
   window.addEventListener('pointercancel',end);
+
+  browser.addEventListener('click',event=>{
+    if(browser.dataset.suppressClick==='1'){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  },true);
 }
 function installHeroTilt(){
   const deck=$('#floating-deck');
