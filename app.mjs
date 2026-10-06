@@ -252,7 +252,7 @@ function buildPositionRail(){
   }).join('');
 }
 function focusDeckCard(index){
-  const buttons=$('#deck-track .deck-card');
+  const buttons=$$('#deck-track .deck-card');
   if(!buttons.length)return;
   let next=Math.max(0,Math.min(index,buttons.length-1));
   let guard=buttons.length;
@@ -264,7 +264,7 @@ function focusDeckCard(index){
   buttons[next]?.focus({preventScroll:true});
 }
 function wireDeckCards(){
-  const buttons=$('#deck-track .deck-card');
+  const buttons=$$('#deck-track .deck-card');
   buttons.forEach(button=>{
     button.addEventListener('click',event=>{
       event.preventDefault();
