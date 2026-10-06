@@ -681,3 +681,10 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
     box-shadow:0 0 0 2px rgba(154,122,72,.28),0 7px 22px rgba(107,42,57,.18);
   }
 }
+
+/* Question echo: italic sans-serif, including Korean. */
+.question-echo{
+  font-family:var(--sans)!important;
+  font-style:italic!important;
+  font-weight:400;
+}
