@@ -544,7 +544,7 @@ export function synthesis(slug,picks){
   if(strongestIndex<0)strongestIndex=futureIndex;
   strongest=tags[strongestIndex]||strongest;
   const strongCard=cards.find(c=>c.id===picks[strongestIndex].id),futureCard=cards.find(c=>c.id===picks[futureIndex].id);
-  return [('결론부터 말하면, 카드 흐름상 상대는 '+current+'으로 읽힙니다. '+(synthesisLeadNuance[strongest]||'')).trim(),futureMap[futureTag]||signalNotes[futureTag],'이렇게 읽는 가장 큰 근거는 '+strongCard.koreanName+'에서 ‘'+themes[strongest]+'’ 주제가 반복되기 때문이에요. 마지막 흐름의 '+futureCard.koreanName+'도 앞으로의 태도를 '+themes[futureTag]+' 쪽으로 보여줍니다.','즉 마음의 유무만 보기보다 지금 실제로 연락·만남·거리두기 중 어떤 행동을 하고 있는지 함께 보면 이 리딩이 더 선명해져요.'];
+  return [('결론부터 말하면, 카드 흐름상 상대는 '+withParticle(current,'으로/로')+' 읽힙니다. '+(synthesisLeadNuance[strongest]||'')).trim(),futureMap[futureTag]||signalNotes[futureTag],'이렇게 읽는 가장 큰 근거는 '+strongCard.koreanName+'에서 ‘'+themes[strongest]+'’ 주제가 반복되기 때문이에요. 마지막 흐름의 '+futureCard.koreanName+'도 앞으로의 태도를 '+themes[futureTag]+' 쪽으로 보여줍니다.','즉 마음의 유무만 보기보다 지금 실제로 연락·만남·거리두기 중 어떤 행동을 하고 있는지 함께 보면 이 리딩이 더 선명해져요.'];
  }
  const practical=['job','money','work','study'];
  if(practical.includes(slug)){
