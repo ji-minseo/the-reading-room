@@ -51,6 +51,7 @@
       </div>
 
       <div class="reading-pills" id="reading-pills" aria-label="리딩 선택"></div>
+      <p class="prompt-error" id="prompt-error" role="status" aria-live="polite"></p>
 
       <form class="prompt-box" id="prompt-form">
         <div class="selected-reading" id="selected-reading" hidden></div>
@@ -93,6 +94,7 @@
       </section>
 
       <section class="result-area" id="result-area" hidden>
+        <p class="result-notice" id="result-notice" hidden></p>
         <div class="result-head">
           <p class="kicker">YOUR READING</p>
           <h2>카드가 이렇게 놓였어요.</h2>
@@ -112,8 +114,13 @@
         <section class="result-discovery" id="result-discovery"></section>
 
         <div class="result-actions">
+          <div class="share-actions">
+            <button class="ghost-button" type="button" data-action="copy">결과 복사</button>
+            <button class="ghost-button" type="button" data-action="share">결과 공유</button>
+          </div>
           <button class="reveal-button" type="button" data-action="reset">새 질문 하기 →</button>
         </div>
+        <p class="share-feedback" id="share-feedback" role="status" aria-live="polite"></p>
       </section>
     </section>
   </main>
