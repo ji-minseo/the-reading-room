@@ -146,6 +146,16 @@ function buildPositionRail(){
     `;
   }).join('');
 }
+function wireDeckCards(){
+  $$('#deck-track .deck-card').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      pickCard(Number(button.dataset.deckIndex));
+    });
+  });
+}
+
 function buildDeck(){
   const middle=(state.deck.length-1)/2;
   $('#deck-track').innerHTML=state.deck.map((pick,index)=>{
@@ -153,15 +163,23 @@ function buildDeck(){
     const rotate=(t*7).toFixed(2);
     const y=(Math.abs(t)*13).toFixed(1);
     const picked=state.selected.some(item=>item.deckIndex===index);
-    const dealDelay=Math.min(index,28)*9;
+    const distance=Math.abs(index-middle);
+    const dealDelay=Math.round(distance*14);
+    const spreadShift=(-t*120).toFixed(1);
+    const entryRotate=(t*7).toFixed(2);
     return `
-      <button class="deck-card ${picked?'is-selected':''}" type="button" data-deck-index="${index}" style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms" aria-label="뒤집힌 카드 ${index+1}">
+      <button
+        class="deck-card ${picked?'is-selected':''}"
+        type="button"
+        data-deck-index="${index}"
+        style="--r:${rotate}deg;--y:${y}px;--deal-delay:${dealDelay}ms;--spread-shift:${spreadShift}px;--entry-rotate:${entryRotate}deg"
+        aria-label="뒤집힌 카드 ${index+1}">
         <span class="deck-card-inner"></span>
       </button>
     `;
   }).join('');
+  wireDeckCards();
 }
-
 function updateDraw(){
   $('#selected-count').textContent=state.selected.length;
   $('#required-count').textContent=state.required;
@@ -320,12 +338,21 @@ function unpick(index){
 
 function reshuffle(){
   if(!state.slug) return;
-  state.deck=shuffleDeck();
-  state.selected=[];
-  buildDeck();
-  updateDraw();
-  const browser=$('#deck-browser');
-  browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
+  const draw=$('#draw-area');
+  draw.classList.remove('is-ready');
+  draw.classList.add('is-entering');
+  window.setTimeout(()=>{
+    state.deck=shuffleDeck();
+    state.selected=[];
+    buildDeck();
+    updateDraw();
+    const browser=$('#deck-browser');
+    browser.scrollLeft=Math.max(0,(browser.scrollWidth-browser.clientWidth)/2);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      draw.classList.remove('is-entering');
+      draw.classList.add('is-ready');
+    }));
+  },180);
 }
 
 function resultCard(pick,index){
@@ -431,25 +458,29 @@ function reset(){
 
 function installDeckDrag(){
   const browser=$('#deck-browser');
-  let down=false,startX=0,startScroll=0,moved=false;
-  browser.addEventListener('pointerdown',e=>{
-    down=true;moved=false;startX=e.clientX;startScroll=browser.scrollLeft;
-    browser.setPointerCapture?.(e.pointerId);
-  });
-  browser.addEventListener('pointermove',e=>{
-    if(!down)return;
-    const dx=e.clientX-startX;
-    if(Math.abs(dx)>5)moved=true;
-    browser.scrollLeft=startScroll-dx;
-  });
-  const end=()=>{down=false};
-  browser.addEventListener('pointerup',end);
-  browser.addEventListener('pointercancel',end);
-  browser.addEventListener('click',e=>{
-    if(moved){e.preventDefault();e.stopPropagation();moved=false}
-  },true);
-}
+  let down=false,startX=0,startScroll=0;
 
+  browser.addEventListener('pointerdown',event=>{
+    if(event.target.closest('.deck-card')) return;
+    if(event.pointerType==='touch') return;
+    down=true;
+    startX=event.clientX;
+    startScroll=browser.scrollLeft;
+    browser.classList.add('is-dragging');
+  });
+
+  window.addEventListener('pointermove',event=>{
+    if(!down) return;
+    browser.scrollLeft=startScroll-(event.clientX-startX);
+  });
+
+  const end=()=>{
+    down=false;
+    browser.classList.remove('is-dragging');
+  };
+  window.addEventListener('pointerup',end);
+  window.addEventListener('pointercancel',end);
+}
 function installHeroTilt(){
   const deck=$('#floating-deck');
   const host=$('.floating-deck-wrap');
@@ -467,24 +498,6 @@ function installHeroTilt(){
 document.addEventListener('click',e=>{
   const reading=e.target.closest('[data-reading]');
   if(reading){chooseReading(reading.dataset.reading);return}
-
-  const context=e.target.closest('[data-context]');
-  if(context){
-    state.contextKey=context.dataset.context;
-    $('.context-pill').forEach(btn=>btn.classList.toggle('is-selected',btn===context));
-    return;
-  }
-
-  const count=e.target.closest('[data-count]');
-  if(count){
-    state.yesNoCount=Number(count.dataset.count);
-    state.required=state.yesNoCount;
-    renderContext();
-    return;
-  }
-
-  const deckCard=e.target.closest('[data-deck-index]');
-  if(deckCard){pickCard(Number(deckCard.dataset.deckIndex));return}
 
   const slot=e.target.closest('[data-slot-index]');
   if(slot&&!slot.disabled){unpick(Number(slot.dataset.slotIndex));return}
