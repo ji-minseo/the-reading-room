@@ -118,12 +118,17 @@
 
         <div class="result-actions">
           <div class="share-actions">
-            <button class="ghost-button" type="button" data-action="copy">결과 복사</button>
-            <button class="ghost-button" type="button" data-action="share">결과 공유</button>
+            <div class="share-action-item">
+              <button class="ghost-button" type="button" data-action="copy">결과 복사</button>
+              <p class="share-feedback" id="copy-feedback" role="status" aria-live="polite"></p>
+            </div>
+            <div class="share-action-item">
+              <button class="ghost-button" type="button" data-action="share">결과 공유</button>
+              <p class="share-feedback" id="share-feedback" role="status" aria-live="polite"></p>
+            </div>
           </div>
           <button class="reveal-button" type="button" data-action="reset">새 질문 하기 →</button>
         </div>
-        <p class="share-feedback" id="share-feedback" role="status" aria-live="polite"></p>
       </section>
     </section>
   </main>
