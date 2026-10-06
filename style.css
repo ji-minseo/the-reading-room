@@ -1321,3 +1321,25 @@ body{
   .room-copy > .kicker{gap:9px}
   .room-copy > .kicker::before,.room-copy > .kicker::after{width:20px}
 }
+
+/* Keep the reveal CTA the same size before and after card selection. */
+.draw-actions #reveal-button{
+  flex:0 1 260px;
+  min-height:49px;
+  padding:0 24px;
+  font-size:12px;
+  letter-spacing:.01em;
+}
+.draw-actions.is-complete .reveal-button{
+  flex:0 1 260px;
+  min-height:49px;
+  padding:0 24px;
+  font-size:12px;
+}
+@media(max-width:650px){
+  .draw-actions #reveal-button,
+  .draw-actions.is-complete .reveal-button{
+    width:100%;
+    min-height:50px;
+  }
+}
