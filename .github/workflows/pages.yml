@@ -24,6 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Localize artwork references
+        run: |
+          find . -type f \( -name '*.html' -o -name '*.css' -o -name '*.mjs' -o -name '*.js' \) -not -path './.git/*' -print0 \
+            | xargs -0 sed -i 's#https://pickacard.everytinytool.com/artwork#/artwork#g'
+          if grep -R "https://pickacard.everytinytool.com/artwork" --include='*.html' --include='*.css' --include='*.mjs' --include='*.js' . --exclude-dir=.git; then
+            echo "Remote artwork reference remains after localization."
+            exit 1
+          fi
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
