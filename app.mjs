@@ -1,7 +1,10 @@
 import {cards} from './core/data/cards.mjs';
 import {readings, primary, secondary, tertiary} from './core/data/readings.mjs';
 import {readingContexts} from './core/data/reading-contexts.mjs';
-import {shuffleDeck, interpret, synthesis, verdict, contextualInsight, loadDaily, saveDaily} from './core/engine.mjs';
+import {
+  shuffleDeck, interpret, synthesis, verdict, contextualInsight, loadDaily, saveDaily,
+  readingHeadline, timingInsight, nextAction, combinationInsights, generalAdvice
+} from './core/engine.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -424,16 +427,53 @@ function resultCard(pick,index){
 }
 
 function renderInterpretations(picks){
+  if(state.slug==='today'){
+    const pick=picks[0];
+    const card=cardById(pick.id);
+    const keywordPhrase=card.keywords.join(' · ');
+    const keywordParticle=keywordPhrase==='상실 · 애도'?'를':'을';
+    $('#interpretations').innerHTML=`
+      <section class="daily-reading-grid">
+        ${[
+          ['오늘의 전체 흐름',`‘${keywordPhrase}’${keywordParticle} 오늘의 관점으로 삼아보세요. ${pick.reversed?card.reversed:card.upright}로 읽을 수 있습니다.`],
+          ['연애',pick.reversed?`오늘은 ${card.reversed}로 읽습니다. ${card.advice}`:card.love],
+          ['일 / 학업',`${generalAdvice(card,pick.reversed)} 업무나 공부에서는 이 조언을 오늘 끝낼 작은 과제 하나에 적용해 보세요.`],
+          ['금전',`‘${card.keywords[0]}’ 키워드가 나의 소비 태도와 어떻게 닿는지 돌아보세요. 수익이나 손실의 예고가 아니며, 지출은 실제 예산을 확인한 뒤 결정하세요.`],
+          ['오늘의 조언',generalAdvice(card,pick.reversed)]
+        ].map(([title,text])=>`
+          <article class="daily-reading-item">
+            <span>${title}</span>
+            <p>${text}</p>
+          </article>
+        `).join('')}
+      </section>
+    `;
+    return;
+  }
+
   $('#interpretations').innerHTML=picks.map((pick,index)=>{
     const r=interpret(state.slug,pick,index);
+    const direction=state.slug==='yes-no'
+      ?(pick.reversed
+        ?'역방향이므로 실행보다 조건 재점검을 우선하는 신호로 반영했습니다.'
+        :r.card.yesNo>0
+          ?'시도와 개방을 나타내는 상징으로 YES 쪽에 반영했습니다.'
+          :r.card.yesNo<0
+            ?'멈춤과 재정비를 나타내는 상징으로 NO 쪽에 반영했습니다.'
+            :'조건과 관찰이 필요한 중립의 상징으로 반영했습니다.')
+      :null;
     return `
       <section class="interpretation">
-        <div class="interpretation-index">0${index+1} · ${r.position.label}</div>
+        <div class="interpretation-index">${String(index+1).padStart(2,'0')} · ${r.position.label}</div>
         <div class="interpretation-body">
           <h3>${r.card.koreanName}<span>${pick.reversed?'reversed':'upright'}</span></h3>
+          <div class="keywords">${r.card.keywords.map(keyword=>`<span>${keyword}</span>`).join('')}</div>
           <p class="meaning">${r.meaning}</p>
           <p class="context">${r.context}</p>
-          ${r.example?`<p class="example">${r.example}</p>`:''}
+          ${r.example?`<p class="example"><strong>상황으로 풀면</strong><span>${r.example}</span></p>`:''}
+          ${direction?`<p class="lens">이 카드의 방향성 : ${direction}</p>`:''}
+          ${r.lens?`<p class="lens">${r.lens}</p>`:''}
+          ${r.caution?`<p class="caution">${r.caution}</p>`:''}
         </div>
       </section>
     `;
@@ -449,17 +489,74 @@ function showResult(){
   $('#result-question').textContent=state.question?`“${state.question}”`:'';
   $('#revealed-cards').innerHTML=picks.map(resultCard).join('');
 
-  const summary=synthesis(state.slug,picks);
+  const reading=readings[state.slug];
   const context=contextualInsight(state.slug,state.contextKey,picks);
-  $('#summary-copy').innerHTML=[
-    ...summary,
-    ...(context?[`${context.label} 맥락에서는 ${context.text}`]:[])
-  ].map(line=>`<p>${line}</p>`).join('');
+  const headline=state.slug==='today'?null:readingHeadline(state.slug,picks,state.contextKey);
+  const timing=state.slug==='today'?null:timingInsight(state.slug,picks);
+  const action=state.slug==='today'?null:nextAction(state.slug,picks,state.contextKey);
+  const combinations=state.slug==='today'?[]:combinationInsights(state.slug,picks);
+  const summary=state.slug==='today'
+    ?[generalAdvice(cardById(picks[0].id),picks[0].reversed),reading.summary]
+    :synthesis(state.slug,picks);
+
+  $('#summary-copy').innerHTML=`
+    ${headline?`
+      <section class="reading-answer">
+        <span>이번 리딩의 핵심</span>
+        <strong>${headline}</strong>
+      </section>
+    `:''}
+    ${context?`
+      <section class="reading-context-answer">
+        <span>${context.label} 기준으로 보면</span>
+        <p>${context.text}</p>
+      </section>
+    `:''}
+    ${timing||action?`
+      <div class="reading-insights">
+        ${timing?`
+          <section class="insight-card timing-card">
+            <span>시기 흐름 · ${timing.label}</span>
+            <strong>${timing.range}</strong>
+            <p>${timing.text}</p>
+            ${timing.basis?`<small>${timing.basis}</small>`:''}
+          </section>
+        `:''}
+        ${action?`
+          <section class="insight-card action-card">
+            <span>지금 해볼 것</span>
+            <strong>한 가지를 바로 움직여보세요.</strong>
+            <p>${action}</p>
+          </section>
+        `:''}
+      </div>
+    `:''}
+    ${combinations.length?`
+      <section class="combination-reading">
+        <span>CARDS TOGETHER</span>
+        <h3>카드를 함께 읽으면</h3>
+        <div class="combination-grid">
+          ${combinations.map(item=>`
+            <article>
+              <span>${item.positions}</span>
+              <strong>${item.title}</strong>
+              <p>${item.text}</p>
+            </article>
+          `).join('')}
+        </div>
+      </section>
+    `:''}
+    <section class="big-picture">
+      <span>${state.slug==='today'?'TAKE IT WITH YOU':'THE BIG PICTURE'}</span>
+      <h3>${state.slug==='today'?'오늘 가져갈 한 문장':'그래서, 이번 리딩의 결론은'}</h3>
+      ${summary.map(line=>`<p>${line}</p>`).join('')}
+    </section>
+  `;
 
   const yesno=$('#yesno-result');
   if(state.slug==='yes-no'){
     yesno.hidden=false;
-    yesno.textContent=verdict(picks);
+    yesno.innerHTML=`<span>SYMBOLIC DIRECTION</span><strong>${verdict(picks)}</strong><p>카드 방향을 합쳐 지금의 선택을 YES / 보류 / NO 중 하나로 정리했어요.</p>`;
   }else{
     yesno.hidden=true;
     yesno.textContent='';
