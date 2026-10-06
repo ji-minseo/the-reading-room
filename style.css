@@ -1049,3 +1049,41 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
     padding:24px 16px 30px;
   }
 }
+
+/* Result discovery links: remove browser default hyperlink styling completely. */
+.result-discovery a,
+.result-discovery a:link,
+.result-discovery a:visited,
+.result-discovery a:hover,
+.result-discovery a:active{
+  text-decoration:none!important;
+}
+
+.result-reading-links a,
+.result-reading-links a:link,
+.result-reading-links a:visited{
+  color:var(--ink)!important;
+}
+.result-reading-links a:hover{
+  color:var(--ink)!important;
+}
+
+.result-card-links a,
+.result-card-links a:link,
+.result-card-links a:visited{
+  color:var(--wine-dark)!important;
+}
+.result-card-links a:hover{
+  color:var(--wine)!important;
+}
+
+.result-library-link,
+.result-library-link:link,
+.result-library-link:visited{
+  color:var(--wine)!important;
+  text-decoration:none!important;
+}
+.result-library-link:hover{
+  color:var(--wine-dark)!important;
+  text-decoration:none!important;
+}
