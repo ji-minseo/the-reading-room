@@ -3,202 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#eee5d7">
+  <meta name="theme-color" content="#efe6da">
   <meta name="color-scheme" content="light">
   <title>The Reading Room — Interactive Tarot</title>
-  <meta name="description" content="질문을 고르고, 78장의 카드 중 마음이 가는 카드를 직접 선택해 천천히 펼쳐보는 인터랙티브 타로 경험.">
-  <meta property="og:title" content="The Reading Room">
-  <meta property="og:description" content="Take your time. Choose the card that draws you in.">
-  <meta property="og:type" content="website">
+  <meta name="description" content="질문을 적고, 마음이 가는 카드를 직접 골라 천천히 펼쳐보는 인터랙티브 타로 경험.">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
+  <div class="paper-grain" aria-hidden="true"></div>
 
-  <header class="site-header">
-    <button class="wordmark" type="button" data-action="home" aria-label="처음으로">
+  <header class="topbar">
+    <button class="brand" type="button" data-action="reset">
       <span>THE</span>
       <strong>READING ROOM</strong>
     </button>
-    <div class="header-note">
-      <span class="dot" aria-hidden="true"></span>
-      <span>an interactive tarot experience</span>
-    </div>
-    <button class="quiet-button" type="button" data-action="open-readings">Choose a reading</button>
+    <p>an interactive tarot experience</p>
+    <button class="header-reset" type="button" data-action="reset">New reading</button>
   </header>
 
-  <main id="app" class="app-shell">
-    <section class="scene scene-intro is-active" data-scene="intro" aria-labelledby="intro-title">
-      <div class="intro-copy">
-        <p class="eyebrow">A QUIET PLACE FOR A QUESTION</p>
-        <h1 id="intro-title">Take your time.<br><em>Choose what draws you in.</em></h1>
-        <p class="lede">정답을 서두르지 않아도 괜찮아요. 지금 마음에 걸리는 질문 하나를 가져오세요. 카드를 고르는 시간부터 천천히 시작합니다.</p>
-        <div class="intro-actions">
-          <button class="primary-button" type="button" data-action="open-readings">Enter the room <span>→</span></button>
-          <button class="text-button" type="button" data-action="daily">오늘의 한 장 보기</button>
-        </div>
-        <p class="privacy-note">78 cards · upright & reversed · no sign-up · no question is sent anywhere</p>
-      </div>
-
-      <div class="hero-object" aria-hidden="true">
-        <div class="hero-shadow"></div>
+  <main class="room">
+    <section class="prompt-stage" aria-labelledby="room-title">
+      <div class="floating-deck-wrap" aria-hidden="true">
+        <div class="deck-shadow"></div>
         <div class="floating-deck" id="floating-deck">
-          <div class="hero-card card-layer layer-5"></div>
-          <div class="hero-card card-layer layer-4"></div>
-          <div class="hero-card card-layer layer-3"></div>
-          <div class="hero-card card-layer layer-2"></div>
-          <div class="hero-card card-layer layer-1">
-            <div class="card-back-design">
-              <span class="back-frame"></span>
-              <span class="back-orbit orbit-a"></span>
-              <span class="back-orbit orbit-b"></span>
-              <span class="back-center">
-                <i></i><b>R</b><i></i>
-              </span>
-              <span class="back-corners">✦</span>
-            </div>
+          <span class="float-card c5"></span>
+          <span class="float-card c4"></span>
+          <span class="float-card c3"></span>
+          <span class="float-card c2"></span>
+          <span class="float-card c1"></span>
+        </div>
+      </div>
+
+      <div class="room-copy">
+        <p class="kicker">THE READING ROOM</p>
+        <h1 id="room-title">What is on your mind?</h1>
+        <p class="subcopy">질문을 적고, 마음이 가는 카드를 직접 골라보세요.</p>
+      </div>
+
+      <div class="reading-pills" id="reading-pills" aria-label="리딩 선택"></div>
+
+      <form class="prompt-box" id="prompt-form">
+        <div class="selected-reading" id="selected-reading" hidden></div>
+        <textarea id="question-input" rows="2" maxlength="160" aria-label="타로 질문" placeholder="무엇이 궁금한가요?"></textarea>
+        <div class="prompt-footer">
+          <div class="prompt-meta">
+            <span>78 cards</span>
+            <span>upright & reversed</span>
+            <span>private in your browser</span>
           </div>
+          <button class="ask-button" type="submit" aria-label="카드 뽑기 시작">↑</button>
         </div>
-        <p class="object-caption">THE READING ROOM · DECK I</p>
+      </form>
+
+      <div class="context-row" id="context-row" hidden>
+        <span id="context-label"></span>
+        <div id="context-options" class="context-pills"></div>
       </div>
 
-      <button class="scroll-cue" type="button" data-action="open-readings">
-        <span>Begin a reading</span><i aria-hidden="true"></i>
-      </button>
-    </section>
-
-    <section class="scene scene-readings" data-scene="readings" aria-labelledby="readings-title">
-      <div class="scene-heading">
-        <p class="eyebrow">01 · CHOOSE A READING</p>
-        <h2 id="readings-title">What is on your mind?</h2>
-        <p>가장 가까운 질문 하나만 골라주세요. 선택한 리딩에 맞춰 카드가 놓일 자리가 달라집니다.</p>
-      </div>
-      <div class="reading-grid" id="reading-grid"></div>
-      <div class="scene-footer">
-        <button class="text-button" type="button" data-action="home">← Back to entrance</button>
-      </div>
-    </section>
-
-    <section class="scene scene-question" data-scene="question" aria-labelledby="question-title">
-      <div class="question-layout">
-        <aside class="reading-ticket" id="reading-ticket">
-          <p class="ticket-index">YOUR READING</p>
-          <div class="ticket-mark" id="ticket-mark">♡</div>
-          <p class="ticket-eyebrow" id="ticket-eyebrow"></p>
-          <h2 id="ticket-name"></h2>
-          <p id="ticket-description"></p>
-          <div class="ticket-rule"></div>
-          <p class="ticket-count" id="ticket-count"></p>
-        </aside>
-
-        <div class="question-panel">
-          <p class="eyebrow">02 · BRING A QUESTION</p>
-          <h2 id="question-title">Give the cards something to hold.</h2>
-          <p class="question-intro" id="question-intro"></p>
-
-          <div class="context-block" id="context-block" hidden>
-            <span class="field-label" id="context-label">현재 상황</span>
-            <div class="segmented" id="context-options"></div>
+      <section class="draw-area" id="draw-area" hidden aria-live="polite">
+        <div class="draw-head">
+          <div>
+            <p class="kicker">CHOOSE YOUR CARDS</p>
+            <h2 id="draw-title">마음이 가는 카드를 골라주세요.</h2>
+            <p id="draw-note">카드를 훑어보다가 끌리는 순간 눌러보세요.</p>
           </div>
-
-          <label class="question-field">
-            <span class="field-label">마음속 질문</span>
-            <textarea id="question-input" rows="3" maxlength="160" placeholder="질문을 한 문장으로 적어보세요."></textarea>
-            <span class="character-count"><b id="question-count">0</b>/160</span>
-          </label>
-
-          <div class="count-block" id="yesno-count" hidden>
-            <span class="field-label">카드 수</span>
-            <div class="segmented">
-              <button type="button" data-count="1">1장 · 핵심</button>
-              <button type="button" data-count="2">2장 · 조건까지</button>
-              <button type="button" data-count="3" class="is-selected">3장 · 조언까지</button>
-            </div>
-          </div>
-
-          <div class="question-actions">
-            <button class="primary-button" type="button" data-action="prepare-deck">Shuffle the deck <span>→</span></button>
-            <button class="text-button" type="button" data-action="open-readings">다른 리딩 고르기</button>
-          </div>
+          <div class="draw-count"><b id="selected-count">0</b><span>/</span><b id="required-count">3</b></div>
         </div>
-      </div>
-    </section>
 
-    <section class="scene scene-deck" data-scene="deck" aria-labelledby="deck-title">
-      <div class="deck-heading">
-        <div>
-          <p class="eyebrow">03 · CHOOSE YOUR CARDS</p>
-          <h2 id="deck-title">Notice which card asks for your attention.</h2>
-          <p id="deck-instruction">천천히 훑어보고 마음이 가는 카드를 골라주세요.</p>
+        <div class="position-rail" id="position-rail"></div>
+
+        <div class="deck-browser" id="deck-browser">
+          <div class="deck-track" id="deck-track"></div>
         </div>
-        <div class="selection-counter" aria-live="polite">
-          <span>selected</span>
-          <strong><b id="selected-count">0</b> / <b id="required-count">3</b></strong>
+
+        <div class="draw-actions">
+          <button class="ghost-button" type="button" data-action="reshuffle">다시 섞기</button>
+          <button class="reveal-button" id="reveal-button" type="button" data-action="reveal" disabled>카드 펼쳐보기 →</button>
         </div>
-      </div>
+      </section>
 
-      <div class="table-stage">
-        <div class="position-rail" id="position-rail" aria-label="선택한 카드 위치"></div>
-        <div class="fan-viewport" id="fan-viewport">
-          <div class="fan-track" id="fan-track" role="list" aria-label="78장의 타로 카드"></div>
+      <section class="result-area" id="result-area" hidden>
+        <div class="result-head">
+          <p class="kicker">YOUR READING</p>
+          <h2>카드가 이렇게 놓였어요.</h2>
+          <p class="question-echo" id="result-question"></p>
         </div>
-        <div class="fan-guidance">
-          <span>← drag or scroll →</span>
-          <span>카드는 뒤집기 전까지 보이지 않아요</span>
+
+        <div class="revealed-cards" id="revealed-cards"></div>
+
+        <article class="overall-reading">
+          <span>OVERALL READING</span>
+          <div id="summary-copy"></div>
+          <div class="yesno-result" id="yesno-result" hidden></div>
+        </article>
+
+        <div class="interpretations" id="interpretations"></div>
+
+        <div class="result-actions">
+          <button class="reveal-button" type="button" data-action="reset">새 질문 하기 →</button>
         </div>
-      </div>
-
-      <div class="deck-actions">
-        <button class="secondary-button" type="button" data-action="reshuffle">다시 섞기</button>
-        <button class="primary-button" type="button" id="reveal-button" data-action="reveal" disabled>Reveal the reading <span>→</span></button>
-      </div>
-    </section>
-
-    <section class="scene scene-result" data-scene="result" aria-labelledby="result-title">
-      <div class="result-heading">
-        <p class="eyebrow">04 · YOUR READING</p>
-        <h2 id="result-title">The cards on the table.</h2>
-        <p id="result-question"></p>
-      </div>
-
-      <div class="revealed-spread" id="revealed-spread"></div>
-
-      <article class="reading-report">
-        <div class="report-label">OVERALL READING</div>
-        <div class="summary-copy" id="summary-copy"></div>
-        <div class="yesno-verdict" id="yesno-verdict" hidden></div>
-      </article>
-
-      <div class="interpretations" id="interpretations"></div>
-
-      <div class="closing-card">
-        <p class="eyebrow">BEFORE YOU LEAVE</p>
-        <h3>Keep what feels useful.<br>Leave the rest on the table.</h3>
-        <p>카드는 사실을 확인하거나 미래를 확정하는 도구가 아니에요. 현실의 정보와 나의 선택을 함께 살펴보세요.</p>
-        <div class="closing-actions">
-          <button class="primary-button" type="button" data-action="restart">Another reading <span>→</span></button>
-          <button class="text-button" type="button" data-action="home">입구로 돌아가기</button>
-        </div>
-      </div>
+      </section>
     </section>
   </main>
 
-  <div class="daily-return" id="daily-return" hidden role="dialog" aria-modal="true" aria-labelledby="daily-return-title">
-    <button class="modal-scrim" type="button" data-action="close-daily" aria-label="닫기"></button>
-    <div class="daily-card-modal">
-      <p class="eyebrow">TODAY'S CARD</p>
-      <h2 id="daily-return-title">오늘의 카드는 이미 기다리고 있어요.</h2>
-      <p>같은 기기에서 오늘 뽑은 한 장을 다시 펼쳐볼 수 있습니다.</p>
-      <div class="modal-actions">
-        <button class="primary-button" type="button" data-action="resume-daily">오늘의 카드 보기 <span>→</span></button>
-        <button class="text-button" type="button" data-action="close-daily">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <footer class="site-footer">
+  <footer class="footer">
     <span>THE READING ROOM</span>
-    <p>A sister experience to Pick a Card.</p>
+    <span>A sister experience to Pick a Card.</span>
     <span>© 2026</span>
   </footer>
 
