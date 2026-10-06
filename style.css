@@ -569,3 +569,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 @media(max-width:650px){
   .position-rail{padding-top:24px}
 }
+
+/* Tighten deck browser top spacing. */
+.deck-browser{padding-top:0!important}
+@media(max-width:650px){.deck-browser{padding-top:0!important}}
