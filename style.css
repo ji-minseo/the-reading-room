@@ -1142,12 +1142,12 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   align-items:center;
 }
 .draw-actions.is-complete .reveal-button{
-  flex:1 1 360px;
-  min-height:58px;
-  padding:0 28px;
-  font-size:14px;
+  flex:0 1 260px;
+  min-height:49px;
+  padding:0 24px;
+  font-size:12px;
   letter-spacing:.01em;
-  box-shadow:0 0 0 1px rgba(107,42,57,.08),0 10px 30px rgba(107,42,57,.25),0 0 24px rgba(107,42,57,.2);
+  box-shadow:0 0 0 1px rgba(107,42,57,.06),0 7px 20px rgba(107,42,57,.18),0 0 14px rgba(107,42,57,.12);
 }
 .draw-actions.is-complete .ghost-button{
   flex:0 0 auto;
@@ -1195,7 +1195,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   .draw-actions.is-complete .reveal-button{
     order:-1;
     width:100%;
-    min-height:60px;
+    min-height:50px;
   }
   .draw-actions.is-complete .ghost-button{
     width:100%;
