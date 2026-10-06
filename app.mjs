@@ -133,7 +133,7 @@ function buildPositionRail(){
   const positions=readings[state.slug].positions.slice(0,state.required);
   $('#position-rail').innerHTML=positions.map((position,index)=>{
     const pick=state.selected[index];
-    const filled=Boolean(pick);
+    const filled=Boolean(pick?.placed);
     const card=filled?cardById(pick.id):null;
     const front=filled&&card
       ? `<span class="position-placeholder has-front"><img src="${artworkUrl(card)}" class="${pick.reversed?'is-reversed':''}" alt=""></span>`
@@ -184,9 +184,12 @@ function buildDeck(){
 function updateDraw(){
   $('#selected-count').textContent=state.selected.length;
   $('#required-count').textContent=state.required;
-  $('#reveal-button').disabled=state.selected.length!==state.required;
+  const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
+  $('#reveal-button').disabled=!allPlaced;
   const left=state.required-state.selected.length;
-  $('#draw-note').textContent=left>0?`마음이 가는 카드를 ${left}장 더 골라주세요.`:'카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
+  $('#draw-note').textContent=left>0
+    ?`마음이 가는 카드를 ${left}장 더 골라주세요.`
+    :allPlaced?'카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.':'카드를 자리에 놓고 있어요…';
   buildPositionRail();
   $$('.deck-card').forEach(btn=>{
     btn.classList.toggle('is-selected',state.selected.some(item=>item.deckIndex===Number(btn.dataset.deckIndex)));
@@ -215,7 +218,7 @@ function openDraw(){
   if(state.slug==='today'){
     const saved=loadDaily(localStorage);
     if(saved){
-      state.selected=[{...saved,deckIndex:-1}];
+      state.selected=[{...saved,deckIndex:-1,placed:true}];
       state.required=1;
       showResult();
       return;
@@ -244,7 +247,11 @@ function animatePickToSlot(button,slot,pick){
   const target=slot?.querySelector('.position-placeholder');
   const card=cardById(pick.id);
   const settle=()=>{
+    pick.placed=true;
     buildPositionRail();
+    const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
+    $('#reveal-button').disabled=!allPlaced;
+    if(allPlaced) $('#draw-note').textContent='카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
     const next=$('#position-rail').querySelector(`[data-slot-index="${state.selected.length}"]`);
     next?.classList.add('is-next');
     button?.classList.remove('is-launching');
@@ -318,13 +325,13 @@ function pickCard(index){
   const slotIndex=state.selected.length;
   const button=$(`[data-deck-index="${index}"]`);
   const slot=$(`[data-slot-index="${slotIndex}"]`);
-  state.selected.push({...pick,deckIndex:index});
+  state.selected.push({...pick,deckIndex:index,placed:false});
 
   $('#selected-count').textContent=state.selected.length;
   $('#required-count').textContent=state.required;
-  $('#reveal-button').disabled=state.selected.length!==state.required;
+  $('#reveal-button').disabled=true;
   const left=state.required-state.selected.length;
-  $('#draw-note').textContent=left>0?`마음이 가는 카드를 ${left}장 더 골라주세요.`:'카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
+  $('#draw-note').textContent=left>0?`마음이 가는 카드를 ${left}장 더 골라주세요.`:'카드를 자리에 놓고 있어요…';
 
   animatePickToSlot(button,slot,state.selected.at(-1));
   navigator.vibrate?.(8);
@@ -411,7 +418,7 @@ function renderInterpretations(picks){
 }
 
 function showResult(){
-  if(state.selected.length!==state.required) return;
+  if(state.selected.length!==state.required||!state.selected.every(item=>item.placed!==false)) return;
   const picks=state.selected.map(({id,reversed})=>({id,reversed}));
 
   if(state.slug==='today'&&!loadDaily(localStorage)&&picks[0]) saveDaily(localStorage,picks[0]);
