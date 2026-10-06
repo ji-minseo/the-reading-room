@@ -788,7 +788,7 @@ function shareText(){
 }
 
 async function copyResult(){
-  const feedback=$('#share-feedback');
+  const feedback=$('#copy-feedback');
   try{
     await navigator.clipboard.writeText(shareText());
     if(feedback) feedback.textContent='결과를 복사했어요.';
@@ -829,6 +829,8 @@ function reset(){
   state.reusedDaily=false;
   state.deckFocusIndex=0;
   $('#question-input').value='';
+  const copyFeedback=$('#copy-feedback');
+  if(copyFeedback) copyFeedback.textContent='';
   const shareFeedback=$('#share-feedback');
   if(shareFeedback) shareFeedback.textContent='';
   const resultNotice=$('#result-notice');
