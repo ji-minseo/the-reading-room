@@ -904,3 +904,10 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
   width:100%;
   min-width:0;
 }
+
+/* Main footer: isolate from legacy grid styles. */
+.footer{display:block!important;grid-template-columns:none!important;align-items:stretch!important;min-height:0!important;padding:0 clamp(18px,4vw,56px)!important;text-transform:none}
+.footer-main{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px;text-transform:uppercase;letter-spacing:.1em}
+.footer-main span{display:block!important;text-align:initial!important}.footer-main span:last-child{text-align:right!important}
+.footer-links{width:100%;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:9px 16px;padding:16px 0 20px;border-top:1px solid var(--line);font-size:9px;line-height:1.4;letter-spacing:0}
+@media(max-width:650px){.footer{padding:0 16px!important}.footer-main{min-height:58px}.footer-links{gap:8px 13px;padding:14px 0 18px}}
