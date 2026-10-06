@@ -139,10 +139,10 @@ function buildPositionRail(){
       ? `<span class="position-placeholder has-front"><img src="${artworkUrl(card)}" class="${pick.reversed?'is-reversed':''}" alt=""></span>`
       : `<span class="position-placeholder">${index+1}</span>`;
     return `
-      <button class="position-slot ${filled?'is-filled':''}" type="button" data-slot-index="${index}" ${filled?'':'disabled'}>
+      <div class="position-slot ${filled?'is-filled':''}" data-slot-index="${index}">
         ${front}
         <p>${position.label}</p>
-      </button>
+      </div>
     `;
   }).join('');
 }
@@ -186,6 +186,7 @@ function updateDraw(){
   $('#required-count').textContent=state.required;
   const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
   $('#reveal-button').disabled=!allPlaced;
+  $('#reveal-button').classList.toggle('is-ready',allPlaced);
   const left=state.required-state.selected.length;
   $('#draw-note').textContent=left>0
     ?`마음이 가는 카드를 ${left}장 더 골라주세요.`
@@ -251,6 +252,7 @@ function animatePickToSlot(button,slot,pick){
     buildPositionRail();
     const allPlaced=state.selected.length===state.required&&state.selected.every(item=>item.placed);
     $('#reveal-button').disabled=!allPlaced;
+    $('#reveal-button').classList.toggle('is-ready',allPlaced);
     if(allPlaced) $('#draw-note').textContent='카드가 모두 놓였어요. 이제 펼쳐볼 수 있어요.';
     const next=$('#position-rail').querySelector(`[data-slot-index="${state.selected.length}"]`);
     next?.classList.add('is-next');
@@ -330,22 +332,16 @@ function pickCard(index){
   $('#selected-count').textContent=state.selected.length;
   $('#required-count').textContent=state.required;
   $('#reveal-button').disabled=true;
+  $('#reveal-button').classList.remove('is-ready');
   const left=state.required-state.selected.length;
   $('#draw-note').textContent=left>0?`마음이 가는 카드를 ${left}장 더 골라주세요.`:'카드를 자리에 놓고 있어요…';
 
   animatePickToSlot(button,slot,state.selected.at(-1));
   navigator.vibrate?.(8);
 }
-function unpick(index){
-  if(index<0||index>=state.selected.length) return;
-  state.selected.splice(index,1);
-  buildDeck();
-  updateDraw();
-  $('#draw-area').classList.add('is-ready');
-}
-
 function reshuffle(){
   if(!state.slug) return;
+  $('#reveal-button').classList.remove('is-ready');
   const draw=$('#draw-area');
   const track=$('#deck-track');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -474,6 +470,7 @@ function reset(){
   state.required=0;
   state.yesNoCount=3;
   $('#question-input').value='';
+  $('#reveal-button').classList.remove('is-ready');
   $('#draw-area').hidden=true;
   $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
@@ -533,9 +530,6 @@ function installHeroTilt(){
 document.addEventListener('click',e=>{
   const reading=e.target.closest('[data-reading]');
   if(reading){chooseReading(reading.dataset.reading);return}
-
-  const slot=e.target.closest('[data-slot-index]');
-  if(slot&&!slot.disabled){unpick(Number(slot.dataset.slotIndex));return}
 
   const action=e.target.closest('[data-action]')?.dataset.action;
   if(!action)return;
