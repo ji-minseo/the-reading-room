@@ -123,7 +123,9 @@ function clearReading(){
   renderSelectedReading();
   renderContext();
   $('#draw-area').hidden=true;
+  $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
+  $('#result-area').classList.remove('is-entering');
 }
 
 function buildPositionRail(){
@@ -418,7 +420,9 @@ function reset(){
   state.yesNoCount=3;
   $('#question-input').value='';
   $('#draw-area').hidden=true;
+  $('#draw-area').classList.remove('is-ready','is-entering','is-leaving');
   $('#result-area').hidden=true;
+  $('#result-area').classList.remove('is-entering');
   renderReadingPills();
   renderSelectedReading();
   renderContext();
