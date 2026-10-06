@@ -911,3 +911,63 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 .footer-main span{display:block!important;text-align:initial!important}.footer-main span:last-child{text-align:right!important}
 .footer-links{width:100%;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:9px 16px;padding:16px 0 20px;border-top:1px solid var(--line);font-size:9px;line-height:1.4;letter-spacing:0}
 @media(max-width:650px){.footer{padding:0 16px!important}.footer-main{min-height:58px}.footer-links{gap:8px 13px;padding:14px 0 18px}}
+
+/* Main page footer — fully isolated from legacy .footer rules. */
+.main-footer{
+  width:100%;
+  border-top:1px solid var(--line);
+  padding:0 clamp(18px,4vw,56px);
+  color:var(--muted);
+  background:transparent;
+  font-family:var(--sans);
+}
+.main-footer-row{
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  font-size:8px;
+  line-height:1;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.main-footer-row span{
+  display:block;
+  margin:0;
+  padding:0;
+}
+.main-footer-nav{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  gap:9px 16px;
+  padding:16px 0 20px;
+  border-top:1px solid var(--line);
+  font-size:9px;
+  line-height:1.45;
+  letter-spacing:0;
+  text-transform:none;
+}
+.main-footer-nav a{
+  display:inline-block;
+  color:var(--muted);
+  text-decoration:none;
+}
+.main-footer-nav a:hover{
+  color:var(--wine);
+}
+@media(max-width:650px){
+  .main-footer{
+    padding:0 16px;
+  }
+  .main-footer-row{
+    min-height:58px;
+  }
+  .main-footer-nav{
+    gap:8px 13px;
+    padding:14px 0 18px;
+  }
+}
