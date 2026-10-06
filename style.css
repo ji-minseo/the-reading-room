@@ -1212,3 +1212,22 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--wine);outlin
 .deck-browser{cursor:grab}
 .deck-browser.is-dragging{cursor:grabbing;user-select:none}
 .deck-browser.is-dragging .deck-card{cursor:grabbing}
+
+.share-action-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+}
+.share-action-item .share-feedback{
+  min-height:14px;
+  margin:0;
+  font-size:9px;
+  line-height:1.4;
+  text-align:center;
+  white-space:nowrap;
+}
+@media(max-width:650px){
+  .share-action-item{flex:1 1 0}
+  .share-action-item .ghost-button{width:100%}
+}
