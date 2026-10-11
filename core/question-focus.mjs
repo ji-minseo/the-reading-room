@@ -197,8 +197,8 @@ export function reconcileQuestionReading(slug,focus,picks,result){
   combinations:[],
   summaryLines:[
    '결론부터 말하면, 카드는 다시 만나야 할 이유나 의무를 정해주지 않아요. 재회를 원하지 않는 마음이나 망설임이 있다면 실제 관계의 경계와 내 선택을 우선해도 괜찮습니다.',
-   `‘재회를 막고 있는 요소’ 위치의 ${obstacle.koreanName} 카드에서는 ‘${obstacle.keywords[0]}’을 상징적으로 읽어볼 수 있어요. 이전 관계에서 더는 반복하고 싶지 않은 조건이 무엇인지 생각해보세요.`,
-   `‘앞으로의 관계 흐름’ 위치의 ${future.koreanName} 카드에서는 ‘${future.keywords[0]}’을 떠올릴 수 있어요. 이 카드는 원하지 않는 재접촉을 권하는 뜻이 아니라, 앞으로 나에게 필요한 선택의 기준을 정리하는 관점이에요.`,
+   `‘재회를 막고 있는 요소’ 위치의 ${obstacle.koreanName} 카드에서는 ‘${obstacle.keywords[0]}’${josa(obstacle.keywords[0],'object')} 상징적으로 읽어볼 수 있어요. 이전 관계에서 더는 반복하고 싶지 않은 조건이 무엇인지 생각해보세요.`,
+   `‘앞으로의 관계 흐름’ 위치의 ${future.koreanName} 카드에서는 ‘${future.keywords[0]}’${josa(future.keywords[0],'object')} 떠올릴 수 있어요. 이 카드는 원하지 않는 재접촉을 권하는 뜻이 아니라, 앞으로 나에게 필요한 선택의 기준을 정리하는 관점이에요.`,
    '지금은 이 부분을 먼저 보세요 : '+focus.action
   ]
  };
