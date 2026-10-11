@@ -1,7 +1,7 @@
 export const readingContexts={
  love:{label:'현재 상황',options:[['solo','솔로'],['crush','썸 · 짝사랑'],['relationship','연애 중']]},
  reunion:{label:'헤어진 지',options:[['recent','1개월 미만'],['mid','1~3개월'],['long','3개월 이상']]},
- breakup:{label:'지금 관계',options:[['conflict','갈등 중'],['distance','권태 · 거리감'],['considering','이별을 고민 중']]},
+ breakup:{label:'현재 상태',options:[['conflict','갈등 중'],['distance','권태 · 거리감'],['considering','이별을 고민 중'],['post','이별 후']]},
  feelings:{label:'상대와의 관계',options:[['crush','썸 · 짝사랑'],['relationship','연애 중'],['ex','전 연인']]},
  contact:{label:'연락이 끊긴 지',options:[['recent','1주 미만'],['mid','1주~1개월'],['long','1개월 이상']]},
  'reunion-timing':{label:'헤어진 지',options:[['recent','1개월 미만'],['mid','1~3개월'],['long','3개월 이상']]},
@@ -25,7 +25,8 @@ export const contextProfiles={
  breakup:{
   conflict:{active:'싸움 자체보다 싸운 뒤 문제를 다시 다룰 수 있는지가 관계 회복의 핵심이에요.',difficult:'같은 갈등이 반복되고 해결 방식이 바뀌지 않는다면 관계 소모가 더 크게 읽혀요.'},
   distance:{active:'거리감이 있어도 대화와 생활 리듬을 다시 맞출 여지가 있는지 볼 수 있어요.',difficult:'권태를 억지로 설렘으로 덮기보다 무엇이 멀어지게 했는지 먼저 확인해야 해요.'},
-  considering:{active:'관계를 끝내기 전 실제로 바꿀 수 있는 조건이 남아 있는지 한 번 더 볼 만해요.',difficult:'이미 오래 버틴 문제라면 사랑의 크기보다 계속 감당할 수 있는 관계인지가 더 중요해요.'}
+  considering:{active:'관계를 끝내기 전 실제로 바꿀 수 있는 조건이 남아 있는지 한 번 더 볼 만해요.',difficult:'이미 오래 버틴 문제라면 사랑의 크기보다 계속 감당할 수 있는 관계인지가 더 중요해요.'},
+  post:{active:'이미 이별한 뒤라면 관계를 되돌리는 답보다, 이번 관계에서 남은 감정과 배운 기준을 정리하는 쪽에 초점을 맞춰보세요.',difficult:'이별 뒤에도 상처나 미련이 크게 남아 있다면 상대의 마음보다 내 일상과 감정을 다시 안정시키는 일이 먼저예요.'}
  },
  feelings:{
   crush:{active:'상대가 신경 쓰고 반응하는 마음이 있다면 연락과 질문처럼 작은 행동으로 드러날 가능성이 있어요.',difficult:'호감 신호를 찾기보다 상대가 실제로 대화를 이어가려는지부터 보는 편이 정확해요.'},
