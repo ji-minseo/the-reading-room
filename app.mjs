@@ -6,6 +6,7 @@ import {
   shuffleDeck, interpret, synthesis, verdict, contextualInsight, loadDaily, saveDaily,
   readingHeadline, timingInsight, nextAction, combinationInsights, generalAdvice, withParticle
 } from './core/engine.mjs';
+import {resolveQuestionFocus,reconcileQuestionReading} from './core/question-focus.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -662,20 +663,38 @@ function showResult(options={}){
   $('#revealed-cards').innerHTML=picks.map(resultCard).join('');
 
   const reading=readings[state.slug];
-  const context=contextualInsight(state.slug,state.contextKey,picks);
-  const headline=state.slug==='today'?null:readingHeadline(state.slug,picks,state.contextKey);
-  const timing=state.slug==='today'?null:timingInsight(state.slug,picks);
-  const action=state.slug==='today'?null:nextAction(state.slug,picks,state.contextKey);
-  const combinations=state.slug==='today'?[]:combinationInsights(state.slug,picks);
-  const summary=state.slug==='today'
-    ?[generalAdvice(cardById(picks[0].id),picks[0].reversed),reading.summary]
-    :synthesis(state.slug,picks);
+  const questionFocus=resolveQuestionFocus(state.slug,state.question,state.contextKey,picks);
+  const boundaryReading=state.slug==='reunion'&&questionFocus?.key==='boundaries';
+  const context=state.slug==='today'||boundaryReading?null:contextualInsight(state.slug,state.contextKey,picks);
+  const relatedSlugs=boundaryReading?['breakup','today','feelings']:(reading.related||[]);
+  const baseReading={
+    headline:state.slug==='today'?null:readingHeadline(state.slug,picks,state.contextKey),
+    timing:state.slug==='today'?null:timingInsight(state.slug,picks),
+    action:state.slug==='today'?null:nextAction(state.slug,picks,state.contextKey),
+    combinations:state.slug==='today'?[]:combinationInsights(state.slug,picks),
+    summaryLines:state.slug==='today'
+      ?[generalAdvice(cardById(picks[0].id),picks[0].reversed),reading.summary]
+      :synthesis(state.slug,picks)
+  };
+  const {headline,timing,action,combinations,summaryLines}=reconcileQuestionReading(state.slug,questionFocus,picks,baseReading);
+  const summary=summaryLines;
 
   $('#summary-copy').innerHTML=`
     ${headline?`
       <section class="reading-answer">
         <span>이번 리딩의 핵심</span>
         <strong>${headline}</strong>
+      </section>
+    `:''}
+    ${questionFocus?`
+      <section class="question-focus" aria-label="질문별 맞춤 해석">
+        <span>YOUR QUESTION, IN FOCUS</span>
+        <h3>${questionFocus.label}에 맞춰 읽으면</h3>
+        <p>${questionFocus.description}</p>
+        <p>${questionFocus.evidence}</p>
+        ${questionFocus.counterpoint?`<p class="question-focus-counterpoint"><strong>함께 보면</strong> ${questionFocus.counterpoint}</p>`:''}
+        <p class="question-focus-next"><strong>지금 해볼 일</strong> ${questionFocus.action}</p>
+        <small>${questionFocus.source==='question'?'입력한 질문의 주제를':'선택한 현재 상황을'} 기준으로 카드의 한 위치를 집중해 읽었어요. 카드 결과는 실제 사건을 확정하지 않습니다.</small>
       </section>
     `:''}
     ${context?`
@@ -692,6 +711,7 @@ function showResult(options={}){
             <strong>${timing.range}</strong>
             <p>${timing.text}</p>
             ${timing.basis?`<small>${timing.basis}</small>`:''}
+            <small class="timing-disclaimer">이 기간은 카드의 흐름을 이해하기 위한 상징적 비유로, 실제 사건이 발생할 날짜나 기다려야 할 기한을 예측하지 않아요.</small>
           </section>
         `:''}
         ${action?`
@@ -738,9 +758,9 @@ function showResult(options={}){
   const interpretationDisclosure=$('#interpretation-disclosure');
   if(interpretationDisclosure) interpretationDisclosure.open=!matchMedia('(max-width:780px)').matches;
 
-  const related=(readings[state.slug]?.related||[]).filter(slug=>readings[slug]);
+  const related=relatedSlugs.filter(slug=>readings[slug]);
   $('#result-discovery').innerHTML=`
-    <div class="result-discovery-head"><span>KEEP READING</span><h3>다른 타로도 이어서 볼까요?</h3></div>
+    <div class="result-discovery-head"><span>KEEP READING</span><h3>${boundaryReading?'다른 고민도 살펴볼까요?':'다른 타로도 이어서 볼까요?'}</h3></div>
     <div class="result-reading-links">${related.map(slug=>`<a href="/tarot/${slug}/"><strong>${readings[slug].name}</strong><span>${readings[slug].tagline}</span></a>`).join('')}</div>
     <div class="result-card-links"><span>방금 뽑은 카드 뜻 더 보기</span><div>${picks.map(pick=>{const card=cardById(pick.id);return `<a href="/cards/${cardSlug(card)}/">${card.koreanName} <small>${card.name}</small></a>`}).join('')}</div></div>
     <a class="result-library-link" href="/cards/">타로 카드 78장 전체 보기 →</a>
