@@ -1364,3 +1364,62 @@ body{
     width:100%;
   }
 }
+
+
+/* Question-aware reading focus — inherits The Reading Room's quiet editorial surface. */
+.question-focus{
+  margin:0 0 18px;
+  padding:16px 17px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.3);
+}
+.question-focus>span{
+  display:block;
+  margin-bottom:7px;
+  color:var(--wine);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+.question-focus h3{
+  margin:0 0 10px;
+  font:700 18px/1.5 var(--sans);
+  word-break:keep-all;
+}
+.question-focus p{
+  margin:8px 0 0;
+  font-family:var(--sans);
+  font-size:12px;
+  line-height:1.8;
+  word-break:keep-all;
+}
+.question-focus-counterpoint{
+  padding:10px 11px;
+  border-left:2px solid rgba(107,42,57,.28);
+  background:rgba(255,255,255,.24);
+}
+.question-focus-next{
+  padding-top:10px;
+  border-top:1px solid var(--line);
+}
+.question-focus small{
+  display:block;
+  margin-top:10px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.65;
+  word-break:keep-all;
+}
+.timing-disclaimer{
+  padding-top:9px;
+  border-top:1px solid var(--line);
+  word-break:keep-all;
+}
+@media(max-width:650px){
+  .question-focus{padding:14px 15px}
+  .question-focus h3{font-size:17px}
+  .question-focus p{font-size:12px}
+  .timing-disclaimer{font-size:11px;line-height:1.7}
+}
