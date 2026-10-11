@@ -2,20 +2,10 @@ import {positionVoices,themes} from './data/narratives.mjs';
 import {cards} from './data/cards.mjs';
 import {readings} from './data/readings.mjs';
 import {readingContexts,contextProfiles} from './data/reading-contexts.mjs';
+import {josa} from './korean.mjs';
 export function koreanParticle(text,pair){
- const value=String(text??'').trim();
- let jong=0,found=false;
- for(let i=value.length-1;i>=0;i--){
-  const code=value.charCodeAt(i);
-  if(code>=0xAC00&&code<=0xD7A3){jong=(code-0xAC00)%28;found=true;break;}
- }
- if(!found)jong=0;
- if(pair==='이/가')return jong?'이':'가';
- if(pair==='은/는')return jong?'은':'는';
- if(pair==='을/를')return jong?'을':'를';
- if(pair==='과/와')return jong?'과':'와';
- if(pair==='으로/로')return !jong||jong===8?'로':'으로';
- return '';
+ const type={'이/가':'subject','은/는':'topic','을/를':'object','과/와':'and','으로/로':'direction'}[pair];
+ return type?josa(text,type):'';
 }
 export function withParticle(text,pair){return String(text)+koreanParticle(text,pair);}
 export function randomInt(max,cryptoSource=globalThis.crypto){
@@ -146,7 +136,7 @@ export function contextualInsight(slug,contextKey,picks){
  const signals=spreadSignals(slug,picks),tags=signals.positions.map(p=>p.tags[0]);
  const difficult=tags.filter(t=>['blocked','conflict','distance','closure'].includes(t)).length>=Math.ceil(tags.length/2);
  const strongest=signals.ranked[0]?.[0],option=readingContexts[slug].options.find(([key])=>key===contextKey),profile=contextProfiles[slug][contextKey];
- return {label:option?.[1]||contextKey,text:(difficult?profile.difficult:profile.active)+' 이번 배열에서는 특히 ‘'+themes[strongest]+'’을 같이 봐야 해요.'};
+ return {label:option?.[1]||contextKey,text:(difficult?profile.difficult:profile.active)+' 이번 배열에서는 특히 ‘'+themes[strongest]+'’'+josa(themes[strongest],'object')+' 같이 봐야 해요.'};
 }
 const jobPositionScenes=[
  {
@@ -214,7 +204,7 @@ export function situationExample(slug,pick,index){
 }
 const headlineContextNotes={
  reunion:{recent:'헤어진 직후라면 감정의 크기보다 같은 문제가 다시 반복되지 않을 준비가 됐는지를 더 크게 봐야 해요.',mid:'1~3개월 정도 지났다면 그리움보다 실제로 달라진 행동이 있는지가 중요해요.',long:'오래 지난 관계라면 예전으로 돌아가기보다 지금의 두 사람이 새로 연결될 수 있는지를 봐야 해요.'},
- breakup:{conflict:'지금처럼 갈등 중이라면 사랑의 크기보다 싸운 뒤 문제를 다시 다룰 수 있는지가 핵심이에요.',distance:'권태나 거리감이 주제라면 설렘을 억지로 되살리기보다 무엇이 멀어지게 했는지 먼저 보는 편이 맞아요.',considering:'이미 이별을 고민 중이라면 계속 버틸 수 있는 관계인지가 카드의 긍정성보다 더 중요해요.'},
+ breakup:{conflict:'지금처럼 갈등 중이라면 사랑의 크기보다 싸운 뒤 문제를 다시 다룰 수 있는지가 핵심이에요.',distance:'권태나 거리감이 주제라면 설렘을 억지로 되살리기보다 무엇이 멀어지게 했는지 먼저 보는 편이 맞아요.',considering:'이미 이별을 고민 중이라면 계속 버틸 수 있는 관계인지가 카드의 긍정성보다 더 중요해요.',post:'이미 이별한 뒤라면 재회 가능성을 억지로 끌어오지 않고, 남은 감정과 이 관계가 내게 남긴 기준을 정리하는 쪽으로 읽는 게 맞아요.'},
  feelings:{crush:'썸이나 짝사랑이라면 호감처럼 보이는 신호보다 실제로 대화를 이어가려는 행동을 더 크게 보세요.',relationship:'연애 중이라면 마음의 유무보다 피로와 갈등 속에서도 관계를 돌보는 행동이 남아 있는지가 중요해요.',ex:'전 연인이라면 미련이 남아 있다는 해석과 다시 만나고 싶다는 의지는 따로 봐야 해요.'},
  contact:{recent:'연락이 끊긴 지 며칠 정도라면 침묵 자체를 큰 결론으로 만들기보다 조금 더 여백을 두는 편이 좋아요.',mid:'1주 이상 끊겼다면 단순한 타이밍보다 연락을 미루게 만든 부담이 반복되고 있는지 확인해야 해요.',long:'오래 끊긴 연락이라면 예전 대화를 그대로 이어가기보다 지금 다시 대화할 현실적인 이유가 있는지가 중요해요.'}
 };
@@ -282,7 +272,7 @@ const synthesisLeadNuance={
 };
 export function readingHeadline(slug,picks,situation=''){
  if(!Array.isArray(picks)||!picks.length)return null;
- const supported=['love','reunion','feelings','contact','job','money','work','study'];if(!supported.includes(slug))return null;
+ const supported=['love','reunion','breakup','feelings','contact','job','money','work','study'];if(!supported.includes(slug))return null;
  const tags=picks.map(p=>{const card=cards.find(c=>c.id===p.id);return (p.reversed?card.reversedTags:card.tags)[0];});
  const signals=spreadSignals(slug,picks),dominant=signals.ranked[0]?.[0]||tags[0];
  const difficult=tags.filter(t=>['blocked','conflict','distance','closure'].includes(t)).length;
@@ -296,10 +286,15 @@ export function readingHeadline(slug,picks,situation=''){
   const base=mostlyDifficult?'현재 흐름만 보면 재회를 밀어붙이기보다 정리와 거리두기 쪽이 더 강합니다.':moving&&difficult===0?'재회 가능성은 닫혀 있지 않습니다. 실제 대화나 재접촉으로 이어질 여지가 있는 배열이에요.':moving?'마음이나 연결의 여지는 남아 있지만, 지금 그대로 다시 만나면 같은 문제가 반복될 가능성이 큽니다.':'그리움은 남아 있어도 실제 재접촉으로 이어질 힘은 아직 약한 편입니다.';
   return withHeadlineContext(slug,situation,(base+' '+(headlineNuance.reunion[dominant]||'')).trim());
  }
+ if(slug==='breakup'){
+  const base=mostlyDifficult?'현재 관계 흐름에서는 붙잡는 것보다 나를 지키는 경계와 정리를 더 크게 봐야 합니다.':moving&&difficult===0?'관계 안에서 아직 바꿔볼 수 있는 지점은 남아 있습니다. 다만 좋은 카드만으로 관계를 유지해야 한다는 뜻은 아니에요.':moving?'관계를 이어갈 여지와 멈춰야 할 신호가 함께 있어, 감정보다 반복되는 행동을 보는 편이 맞습니다.':'지금은 관계의 결론보다 내가 무엇을 계속 감당할 수 있는지 기준을 정리하는 흐름입니다.';
+  const postBase=situation==='post'?(mostlyDifficult?'이별 뒤 상처와 미련이 아직 크게 남아 있어요. 상대의 현재 마음보다 내 감정과 일상을 회복하는 쪽을 먼저 봐야 합니다.':'이별 뒤 감정이 조금씩 정리되면서 이 관계를 다른 시선으로 돌아볼 여지가 생기는 흐름이에요. 재회 여부보다 앞으로 가져갈 기준을 남기는 게 더 중요합니다.'):base;
+  return withHeadlineContext(slug,situation,postBase);
+ }
  if(slug==='feelings'){
   const warm=tags.filter(t=>['attraction','communication','movement','healing','renewal'].includes(t)).length;
   const guarded=tags.filter(t=>['distance','blocked','conflict','closure','waiting'].includes(t)).length;
-  const base=guarded>=2&&warm===0?'카드 흐름으로 보면 지금 상대는 호감 표현보다 거리두기와 자기 상황 정리에 더 기울어 있습니다.':warm>=2&&guarded===0?'카드 흐름으로 보면 호감이나 관심은 있는 편이고, 대화나 행동으로 드러날 여지도 있습니다.':warm>=1&&guarded>=1?'마음이나 관심은 남아 있지만, 부담이나 망설임 때문에 적극적으로 움직이기는 어려운 상태로 읽혀요.':'상대가 아예 무관심한 쪽보다는 아직 판단하고 지켜보는 쪽에 가깝습니다. 행동은 천천히 나올 수 있어요.';
+  const base=guarded>=2&&warm===0?'이번 카드 배열에는 호감 표현보다 거리두기와 자기 상황 정리의 상징이 더 크게 나타납니다.':warm>=2&&guarded===0?'카드 배열에서는 호감과 관심, 대화나 행동으로 움직이는 상징이 함께 나타납니다.':warm>=1&&guarded>=1?'카드에는 관심과 부담의 상징이 함께 나와요. 마음에 대한 추측보다 실제 행동을 확인하는 편이 좋아요.':'지금은 판단을 유보하고 반응을 지켜보는 상징이 중심이에요. 상대의 실제 마음은 카드로 확인할 수 없어요.';
   const nuance={movement:'특히 이번 배열은 생각보다 행동으로 드러나는지가 핵심이에요.',communication:'말을 걸고 반응을 이어가는 힘이 다른 신호보다 더 두드러집니다.',attraction:'끌림은 보이지만 호감과 관계 의지는 구분해서 볼 필요가 있어요.',renewal:'상대를 바라보는 방식이나 관계의 접근법이 바뀌는 흐름이 강합니다.',healing:'강한 표현보다 편안함과 회복을 원하는 마음이 더 앞설 수 있어요.',decision:'상대도 이 관계를 어떻게 둘지 판단하려는 흐름이 강합니다.',reflection:'행동보다 혼자 생각하고 정리하는 시간이 길어질 수 있어요.',waiting:'먼저 움직이기보다 상황과 반응을 지켜보는 쪽에 힘이 실립니다.',distance:'가까워지는 것보다 자기 공간을 지키려는 흐름이 더 선명해요.',closure:'현재는 관계를 이어가는 마음보다 정리와 선 긋기 쪽을 더 크게 봐야 해요.',blocked:'마음이 있더라도 현실적인 부담이 행동을 막는 배열에 가깝습니다.',conflict:'호감과 부담이 함께 있어 태도가 들쭉날쭉하게 보일 수 있어요.'}[dominant]||'';
   return withHeadlineContext(slug,situation,(base+' '+nuance).trim());
  }
@@ -405,12 +400,26 @@ export function timingInsight(slug,picks){
   }
  };
  const ordered=[...items].sort((a,b)=>b.weight-a.weight),fastest=ordered[0],slowest=ordered.at(-1);
- const basis=fastest.weight>=.7&&slowest.weight<=-.7?`${withParticle(fastest.card.koreanName,'이/가')} 속도를 올리는 반면 ${withParticle(slowest.card.koreanName,'이/가')} 흐름을 늦춰, 두 카드 사이의 균형까지 반영했어요.`:fastest.weight>=.7?`${fastest.card.koreanName}처럼 빠르게 움직이는 카드가 전체 시기를 조금 앞당기는 쪽으로 반영됐어요.`:slowest.weight<=-.7?`${slowest.card.koreanName}처럼 천천히 진행되는 카드가 있어, 결과보다 준비와 정리 시간을 더 길게 잡았어요.`:'카드들의 기본 속도가 크게 엇갈리지 않아 전체 배열의 흐름을 중심으로 시기를 잡았어요.';
+ const basis=fastest.weight>=.7&&slowest.weight<=-.7?`${fastest.card.koreanName} 카드가 속도를 올리는 반면 ${slowest.card.koreanName} 카드가 흐름을 늦춰, 두 카드 사이의 균형까지 반영했어요.`:fastest.weight>=.7?`${fastest.card.koreanName}처럼 빠르게 움직이는 카드가 전체 시기를 조금 앞당기는 쪽으로 반영됐어요.`:slowest.weight<=-.7?`${slowest.card.koreanName}처럼 천천히 진행되는 카드가 있어, 결과보다 준비와 정리 시간을 더 길게 잡았어요.`:'카드들의 기본 속도가 크게 엇갈리지 않아 전체 배열의 흐름을 중심으로 시기를 잡았어요.';
  return {label:labels[pace],range:ranges[slug][pace],text:copy[slug][pace],pace,basis,score:Number(score.toFixed(2))};
 }
 const actionScenes={
  love:{movement:'마음에 드는 사람이 있다면 기다리기만 하지 말고 가벼운 대화나 한 번의 만남 제안을 만들어보세요.',communication:'애매한 연락을 해석하기보다 내가 궁금한 것을 하나만 명확하게 물어보세요.',attraction:'설렘이 큰 만큼 실제로 편안한 사람인지 한 번 더 확인해보세요.',renewal:'평소와 다른 모임이나 동선 하나를 추가해 새로운 접점을 만들어보세요.',decision:'내가 원하는 관계의 기준 세 가지를 적고, 지금 관계가 거기에 맞는지 보세요.',healing:'새 사람을 찾기 전에 내 컨디션과 일상을 회복하는 약속 하나를 먼저 잡아보세요.',reflection:'과거 연애에서 반복된 패턴 하나를 적고 이번에는 어떻게 다르게 할지 정해보세요.',waiting:'연락을 기다리는 시간을 정해두고 그 밖의 시간은 내 일정으로 채워보세요.',distance:'상대의 반응이 계속 희미하다면 내가 먼저 쫓아가는 횟수를 줄여보세요.',closure:'끝난 관계나 애매한 썸을 붙잡게 하는 행동 하나를 멈춰보세요.',blocked:'지금 막는 현실 조건이 무엇인지 하나만 특정해서 해결 가능 여부를 확인해보세요.',conflict:'호감보다 서로 원하는 관계 방식이 같은지 먼저 확인해보세요.'},
  reunion:{movement:'연락을 한다면 감정 확인보다 가볍고 답하기 쉬운 안부 한 번으로 시작하세요.',communication:'하고 싶은 말을 길게 보내기보다 꼭 확인할 한 가지를 짧게 말해보세요.',attraction:'그리움과 다시 만나도 괜찮은 관계인지를 분리해서 생각해보세요.',renewal:'예전과 달라진 행동을 하나 만들지 못한다면 연락보다 준비가 먼저예요.',decision:'다시 만날 조건과 다시 만나지 않을 조건을 각각 두 가지씩 적어보세요.',healing:'감정이 올라올 때 바로 연락하지 말고 하루 정도 두고 다시 읽어보세요.',reflection:'헤어진 이유를 한 문장으로 정리하고 지금 그 문제가 실제로 달라졌는지 확인해보세요.',waiting:'언제까지 기다릴지 내 쪽의 기한을 정해 무기한 대기를 막아보세요.',distance:'차단이나 명확한 거절이 있다면 추가 접촉을 멈추고 거리를 존중하세요.',closure:'재회를 원해서가 아니라 외로워서 붙잡는 부분이 있는지 확인해보세요.',blocked:'재회를 막는 가장 현실적인 문제 하나를 해결할 수 있는지부터 보세요.',conflict:'같은 싸움이 반복됐다면 연락 전에 해결 방식부터 바꿀 수 있는지 생각해보세요.'},
+ breakup:{
+  movement:'관계를 이어가고 있다면 감정 확인보다 실제로 바꿀 행동 하나를 정해보세요. 이미 헤어진 뒤라면 상대에게 바로 움직이기보다 내 생활을 다시 채울 행동 하나를 시작해보세요.',
+  communication:'꼭 해야 할 대화가 있다면 감정 전체를 쏟기보다 확인할 한 가지를 짧고 분명하게 말해보세요.',
+  attraction:'좋았던 감정이 남아 있어도 그 감정과 다시 같은 관계를 반복해도 괜찮은지는 따로 생각해보세요.',
+  renewal:'예전 방식으로 돌아가기보다 이번 관계를 통해 앞으로는 무엇을 다르게 하고 싶은지 한 가지 정해보세요.',
+  decision:'계속 만날 조건·멈출 조건, 또는 이별 후 지킬 기준을 각각 적어 내 선택을 선명하게 만들어보세요.',
+  healing:'답을 서두르지 말고 수면·식사·약속처럼 무너진 일상 한 가지를 먼저 회복해보세요.',
+  reflection:'싸움이나 이별 장면을 반복해서 떠올리기보다 내가 놓친 신호와 배운 기준을 한 문장씩 적어보세요.',
+  waiting:'상대의 연락이나 마음이 바뀌기만 기다리지 않도록 내 쪽에서 기다릴 기한과 생활 계획을 정해보세요.',
+  distance:'연락을 줄이거나 멈춰야 편해지는 상태라면 그 거리를 죄책감 없이 유지해보세요.',
+  closure:'끝난 관계라면 상대의 마지막 말보다 내가 이제 그만 반복하고 싶은 행동이나 기대를 하나 정리해보세요.',
+  blocked:'관계를 붙잡는 이유가 사랑인지 외로움·불안·습관인지 구분해보고, 내가 바꿀 수 있는 조건부터 보세요.',
+  conflict:'같은 갈등이 반복됐다면 누가 맞는지보다 다음 관계에서 반복하지 않을 규칙 하나를 정해보세요.'
+ },
  feelings:{movement:'상대의 마음을 더 추측하기보다 실제로 먼저 다가오거나 약속을 잡는 행동이 있는지 한 번 지켜보세요.',communication:'애매한 말의 뜻을 혼자 해석하지 말고 확인할 수 있는 질문 하나만 가볍게 꺼내보세요.',attraction:'호감처럼 느껴지는 신호가 있어도 나를 편하게 존중하는 행동이 함께 있는지 확인해보세요.',renewal:'예전과 다른 태도가 보인다면 한 번의 변화보다 그 방식이 며칠 이상 이어지는지 보세요.',decision:'상대의 결론을 대신 예상하기보다 내가 받아들일 수 있는 관계의 기준 두 가지를 먼저 정해보세요.',healing:'지금은 답을 재촉하기보다 서로 편하게 대화할 수 있는 거리와 속도를 만들어보세요.',reflection:'연락 빈도나 말투를 반복해서 분석하기보다 확인된 행동과 내가 추측한 부분을 따로 적어보세요.',waiting:'상대 반응을 기다리는 시간을 정해두고 그 밖의 시간에는 내 일정으로 돌아오세요.',distance:'상대가 거리를 두는 행동을 보인다면 이유를 추궁하기보다 그 공간을 존중하고 내 기준도 지켜보세요.',closure:'정리 신호가 반복된다면 숨은 마음을 찾기보다 지금 관계가 나에게 어떤 상태인지 먼저 받아들여보세요.',blocked:'마음이 있어 보이더라도 행동을 막는 현실 조건이 무엇인지 실제로 확인 가능한 것만 보세요.',conflict:'가까워졌다 멀어지는 태도가 반복된다면 한 번의 다정함보다 행동의 일관성을 기준으로 보세요.'},
  contact:{movement:'연락 흐름이 움직이는 카드라면 기다리는 것만 반복하지 말고 내가 먼저 연락할 이유가 분명한지도 한 번 정리해보세요.',communication:'연락한다면 길게 설명하기보다 상대가 답하기 쉬운 한 가지 이야기로 대화를 열어보세요.',attraction:'그리움이나 관심 때문에 연락을 기대하는 건지, 실제로 다시 대화할 이유가 있는지 분리해서 생각해보세요.',renewal:'다시 연락한다면 예전 대화를 그대로 이어가기보다 지금 상황에 맞는 새로운 안부로 시작해보세요.',decision:'연락을 기다릴 기한과 내가 먼저 움직일 조건을 각각 하나씩 정해 무기한 대기를 막아보세요.',healing:'답장을 확인하는 횟수를 줄이고 오늘 내 일상에서 회복할 시간을 먼저 확보해보세요.',reflection:'왜 연락이 끊겼는지 추측 목록을 늘리기보다 마지막으로 확인된 대화와 행동만 다시 보세요.',waiting:'기다리는 동안 추가 메시지를 연달아 보내지 말고 상대가 반응할 여백을 남겨보세요.',distance:'상대가 명확히 거리를 두거나 답을 원하지 않는다면 추가 접촉을 멈추고 그 경계를 존중하세요.',closure:'오래 끊긴 대화라면 답장을 받는 것보다 내가 이 관계를 계속 기다릴 이유가 있는지 먼저 정리해보세요.',blocked:'연락을 막는 현실적인 문제를 하나 특정하고 그 조건이 바뀔 수 있는지부터 보세요.',conflict:'연락했다가 다시 멀어지는 패턴이 있다면 메시지 한 번보다 반복되는 갈등의 방식을 먼저 바꿀 수 있는지 생각해보세요.'},
  job:{movement:'오늘 안에 지원할 공고 하나를 정하고 이력서를 실제로 제출해보세요.',communication:'면접에서 말할 대표 경험 하나를 1분 답변으로 만들어 소리 내어 연습해보세요.',reflection:'지원 직무에 맞지 않는 경험은 덜고 핵심 경험 세 개만 남겨보세요.',healing:'하루 정도 취준 시간을 줄이고 수면과 컨디션을 회복해 다음 지원 효율을 높여보세요.',decision:'직무, 연봉, 근무방식 중 포기 못할 기준 두 개를 정해보세요.',attraction:'회사 이름보다 채용공고의 실제 업무 세 줄을 기준으로 지원 여부를 보세요.',distance:'지금 역량과 너무 먼 공고만 보고 있다면 한 단계 현실적인 포지션도 함께 넣어보세요.',renewal:'포트폴리오 첫 화면이나 이력서 첫 세 줄을 새로 써보세요.',waiting:'결과를 기다리는 동안 다음 지원 두 곳을 준비해 흐름을 끊지 마세요.',closure:'효율이 낮은 준비 하나를 과감히 접고 그 시간을 핵심 준비에 몰아주세요.',blocked:'가장 미완성인 준비물 하나를 오늘 끝낼 단위로 쪼개보세요.',conflict:'하고 싶은 직무와 현실 조건을 표로 나눠 우선순위를 정해보세요.'},
@@ -422,7 +431,7 @@ const actionContextNotes={
  reunion:{recent:'헤어진 직후라면 감정이 올라온 날 바로 보내기보다 하루 정도 두고 다시 판단하세요.',mid:'1~3개월이 지났다면 달라진 행동이 하나라도 있는지 확인한 뒤 움직이세요.',long:'오래 지난 관계라면 예전 대화를 복원하려 하기보다 지금 다시 연락할 현실적인 이유부터 정리하세요.'},
  feelings:{crush:'썸이나 짝사랑이라면 호감 신호보다 상대가 실제로 대화를 이어가는지를 기준으로 보세요.',relationship:'연애 중이라면 마음을 추측하기보다 피로와 갈등을 줄일 대화 하나를 실제로 해보세요.',ex:'전 연인이라면 미련이 있다는 해석만으로 재회 의지까지 있다고 보지는 마세요.'},
  contact:{recent:'며칠의 침묵이라면 추가 메시지를 연달아 보내기보다 반응할 여백을 먼저 주세요.',mid:'1주 이상 끊겼다면 연락을 다시 여는 목적을 한 문장으로 정리한 뒤 움직이세요.',long:'오래 끊긴 연락이라면 예전 친밀함을 전제로 하지 말고 새로운 안부처럼 접근할 수 있는지부터 보세요.'},
- breakup:{conflict:'갈등 중이라면 누가 맞는지보다 같은 싸움을 반복하지 않을 규칙 하나를 정해보세요.',distance:'거리감이 주제라면 억지로 분위기를 띄우기보다 멀어진 원인을 하나씩 확인해보세요.',considering:'이별을 고민 중이라면 계속 만날 조건과 멈출 조건을 각각 적어보세요.'}
+ breakup:{conflict:'갈등 중이라면 누가 맞는지보다 같은 싸움을 반복하지 않을 규칙 하나를 정해보세요.',distance:'거리감이 주제라면 억지로 분위기를 띄우기보다 멀어진 원인을 하나씩 확인해보세요.',considering:'이별을 고민 중이라면 계속 만날 조건과 멈출 조건을 각각 적어보세요.',post:'이미 이별한 뒤라면 상대가 돌아올지보다 오늘 내 일상을 회복할 행동 하나를 먼저 정해보세요.'}
 };
 export function nextAction(slug,picks,situation=''){
  const supported=Object.keys(actionScenes);if(!supported.includes(slug)||!Array.isArray(picks)||!picks.length)return null;
@@ -480,7 +489,7 @@ export function interpret(slug,pick,index){
  const card=cards.find(c=>c.id===pick.id),position=readings[slug]?.positions[index];
  if(!card||!position)throw new Error('Unknown card or position');
  const [opening,closing]=positionVoices[slug][index];
- const meaning=`${opening.replace(/에는$/, '에서 살펴볼 주제는')} ‘${card.keywords.join(' · ')}’입니다. ${withParticle(pick.reversed?card.reversed:card.upright,'으로/로')} 읽을 수 있어요.`;
+ const meaning=`${opening.replace(/에는$/, '에서 살펴볼 주제는')} ‘${card.keywords.join(' · ')}’입니다. ${pick.reversed?card.reversed:card.upright}로 읽을 수 있어요.`;
  const context=slug==='yes-no'?`${generalAdvice(card,pick.reversed)} ${closing}`:pick.reversed?`${card.advice} ${closing}`:`${card[position.field]} ${closing}`;
  const example=situationExample(slug,pick,index);
  return {card,position,meaning,context,example,lens:position.lens,caution:null};
@@ -525,17 +534,17 @@ export function synthesis(slug,picks){
  if(slug==='yes-no'){
   const direction=verdict(picks),items=picks.map(p=>{const card=cards.find(c=>c.id===p.id),value=p.reversed?Math.min(0,card.yesNo):card.yesNo,tag=(p.reversed?card.reversedTags:card.tags)[0];return {card,pick:p,value,tag};});
   const strongest=spreadSignals(slug,picks).ranked[0]?.[0],condition=themes[strongest];
-  const first=direction==='YES에 가까움'?'지금 질문에는 해보는 쪽이 더 강합니다. 핵심 조건은 ‘'+condition+'’이에요.':direction==='NO에 가까움'?'지금은 진행하기보다 멈추거나 재검토하는 쪽이 더 강합니다. 가장 크게 걸리는 건 ‘'+condition+'’이에요.':'지금은 YES나 NO를 바로 정하기보다 보류하는 쪽이 맞습니다. 카드들이 한 방향으로 모이지 않아 조건을 하나 더 확인할 필요가 있어요.';
+  const first=direction==='YES에 가까움'?'지금 질문에는 해보는 쪽이 더 강합니다. 핵심 조건은 ‘'+condition+'’'+josa(condition,'copula')+'.':direction==='NO에 가까움'?'지금은 진행하기보다 멈추거나 재검토하는 쪽이 더 강합니다. 가장 크게 걸리는 건 ‘'+condition+'’'+josa(condition,'copula')+'.':'지금은 YES나 NO를 바로 정하기보다 보류하는 쪽이 맞습니다. 카드들이 한 방향으로 모이지 않아 조건을 하나 더 확인할 필요가 있어요.';
   const cardLine=items.map(({card,value})=>card.koreanName+' 카드는 '+(value>0?'진행 쪽':value<0?'보류·재검토 쪽':'중립·조건 확인 쪽')).join(', ');
   const focus=items.find(x=>x.tag===strongest)||items[0];
   const concrete=concreteScenes['yes-no']?.[focus.tag]||generalAdvice(focus.card,focus.pick.reversed);const support=items.find(x=>x!==focus&&x.value!==focus.value)||items[1];
-  return [first,'카드별로 보면 '+cardLine+'이에요. 그래서 왜 이런 답이 나왔는지가 카드마다 분명히 갈립니다.',concrete,support?'추가로 '+support.card.koreanName+' 카드가 '+(support.value>0?'진행 쪽 힘을 보태고 있어요.':support.value<0?'속도를 늦추는 쪽으로 작용해요.':'결정을 한 번 더 확인하게 만드는 카드예요.'):'지금은 첫 카드의 방향을 중심으로 읽으면 됩니다.'];
+  return [first,'카드별로 보면 '+cardLine+josa(cardLine,'copula')+'. 그래서 왜 이런 답이 나왔는지가 카드마다 분명히 갈립니다.',concrete,support?'추가로 '+support.card.koreanName+' 카드가 '+(support.value>0?'진행 쪽 힘을 보태고 있어요.':support.value<0?'속도를 늦추는 쪽으로 작용해요.':'결정을 한 번 더 확인하게 만드는 카드예요.'):'지금은 첫 카드의 방향을 중심으로 읽으면 됩니다.'];
  }
  if(slug==='feelings'){
   const signals=spreadSignals(slug,picks),tags=signals.positions.map(p=>p.tags[0]);
   const warm=tags.filter(t=>['attraction','communication','movement','healing','renewal'].includes(t)).length;
   const guarded=tags.filter(t=>['distance','blocked','conflict','closure','waiting'].includes(t)).length;
-  const current=warm>=2&&guarded===0?'호감이나 관심이 있는 쪽':warm>=1&&guarded>=1?'마음은 있지만 쉽게 행동하지 못하는 쪽':guarded>=2?'지금은 거리와 부담이 더 큰 쪽':'아직 판단하고 지켜보는 쪽';
+  const current=warm>=2&&guarded===0?'호감과 관심의 상징이 두드러지는 배열':warm>=1&&guarded>=1?'관심과 부담의 상징이 함께 나타나는 배열':guarded>=2?'거리와 부담의 상징이 더 강한 배열':'판단을 유보하고 지켜보는 상징이 중심인 배열';
   const futureTag=tags[Math.min(3,tags.length-1)];
   const futureMap={movement:'앞으로는 먼저 말을 걸거나 실제 행동으로 옮길 가능성이 있습니다.',communication:'앞으로는 대화를 이어가거나 표현이 조금 더 분명해질 수 있어요.',attraction:'호감은 이어질 수 있지만 관계를 확정하는 행동까지는 더 지켜봐야 해요.',healing:'강한 진전보다 편안하게 관계를 유지하려는 태도가 나타날 가능성이 큽니다.',renewal:'관계를 예전과 다르게 보거나 새로운 방식으로 접근할 수 있어요.',decision:'관계를 이어갈지 선을 그을지 스스로 결론을 내리려는 태도가 나올 수 있어요.',reflection:'당분간은 행동보다 혼자 생각하고 정리하는 시간이 더 길 수 있어요.',waiting:'먼저 움직이기보다 상대 반응과 상황을 지켜보는 태도가 이어질 수 있어요.',distance:'가까워지기보다 자기 공간을 지키며 거리를 유지하려는 태도가 더 강할 수 있어요.',closure:'현재 흐름이 이어지면 관계를 정리하거나 선을 분명히 하려는 쪽으로 갈 수 있어요.',blocked:'마음이 있어도 현실적인 부담 때문에 표현이나 행동이 계속 늦어질 수 있어요.',conflict:'태도가 가까워졌다 멀어졌다 하며 일관되지 않게 보일 수 있어요.'};
   const futureIndex=Math.min(3,picks.length-1);
@@ -544,7 +553,7 @@ export function synthesis(slug,picks){
   if(strongestIndex<0)strongestIndex=futureIndex;
   strongest=tags[strongestIndex]||strongest;
   const strongCard=cards.find(c=>c.id===picks[strongestIndex].id),futureCard=cards.find(c=>c.id===picks[futureIndex].id);
-  return [('결론부터 말하면, 카드 흐름상 상대는 '+withParticle(current,'으로/로')+' 읽힙니다. '+(synthesisLeadNuance[strongest]||'')).trim(),futureMap[futureTag]||signalNotes[futureTag],'이렇게 읽는 가장 큰 근거는 '+strongCard.koreanName+'에서 ‘'+themes[strongest]+'’ 주제가 반복되기 때문이에요. 마지막 흐름의 '+futureCard.koreanName+'도 앞으로의 태도를 '+themes[futureTag]+' 쪽으로 보여줍니다.','즉 마음의 유무만 보기보다 지금 실제로 연락·만남·거리두기 중 어떤 행동을 하고 있는지 함께 보면 이 리딩이 더 선명해져요.'];
+  return [('결론부터 말하면, 이번 카드는 '+current+'입니다. '+(synthesisLeadNuance[strongest]||'')).trim(),futureMap[futureTag]||signalNotes[futureTag],'이렇게 읽는 가장 큰 근거는 '+strongCard.koreanName+'에서 ‘'+themes[strongest]+'’ 주제가 반복되기 때문이에요. 마지막 흐름의 '+futureCard.koreanName+'도 앞으로의 태도를 '+themes[futureTag]+' 쪽으로 보여줍니다.','즉 마음의 유무만 보기보다 지금 실제로 연락·만남·거리두기 중 어떤 행동을 하고 있는지 함께 보면 이 리딩이 더 선명해져요.'];
  }
  const practical=['job','money','work','study'];
  if(practical.includes(slug)){
@@ -560,7 +569,7 @@ export function synthesis(slug,picks){
   if(supportIndex<0)supportIndex=tags.findIndex((_,i)=>i!==focusAt);
   if(supportIndex>=0)support=tags[supportIndex];
   const supportCard=supportIndex>=0?cards.find(c=>c.id===picks[supportIndex].id):null;
-  return [('결론부터 말하면, '+plainTone+' '+(synthesisLeadNuance[strongest]||'')).trim(),'특히 ‘'+focusText+'’ 자리의 '+focusCard.koreanName+' 때문에 ‘'+themes[focusTag]+'’을 먼저 봐야 해요. '+focusCard.advice,support&&supportCard?'여기에 '+supportCard.koreanName+'의 ‘'+themes[support]+'’도 같이 잡혀 있어서, 한 가지 문제만 고치기보다 두 조건을 같이 조정하는 편이 흐름이 더 빨리 바뀔 수 있어요.':'카드 흐름이 한 방향으로 모여 있어 지금 보이는 핵심을 먼저 움직이는 게 좋아요.','지금 할 일은 이거예요 : '+generalAdvice(focusCard,focusPick.reversed)];
+  return [('결론부터 말하면, '+plainTone+' '+(synthesisLeadNuance[strongest]||'')).trim(),'특히 ‘'+focusText+'’ 자리의 '+focusCard.koreanName+' 때문에 ‘'+themes[focusTag]+'’'+josa(themes[focusTag],'object')+' 먼저 봐야 해요. '+focusCard.advice,support&&supportCard?'여기에 '+supportCard.koreanName+'의 ‘'+themes[support]+'’도 같이 잡혀 있어서, 한 가지 문제만 고치기보다 두 조건을 같이 조정하는 편이 흐름이 더 빨리 바뀔 수 있어요.':'카드 흐름이 한 방향으로 모여 있어 지금 보이는 핵심을 먼저 움직이는 게 좋아요.','지금 할 일은 이거예요 : '+generalAdvice(focusCard,focusPick.reversed)];
  }
  const signals=spreadSignals(slug,picks);
  const tags=signals.positions.map(p=>p.tags[0]);
