@@ -24,6 +24,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Expand card meanings
+        run: npm run build:cards
+
       - name: Localize artwork references
         run: |
           find . -type f \( -name '*.html' -o -name '*.css' -o -name '*.mjs' -o -name '*.js' \) -not -path './.git/*' -print0 \

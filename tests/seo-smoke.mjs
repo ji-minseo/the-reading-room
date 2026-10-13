@@ -35,4 +35,18 @@ for(const url of urls){
     if(!await exists(target))throw new Error(`Broken internal link on ${url}: ${href}`);
   }
 }
+
+const detailCards=urls.filter(url=>/\/cards\/[^/]+\/$/.test(new URL(url).pathname));
+if(detailCards.length!==78)throw new Error(`Expected 78 indexed card details, found ${detailCards.length}`);
+for(const url of detailCards){
+ const html=await readFile(localPath(url),'utf8');
+ const count=re=>(html.match(re)||[]).length;
+ if(count(/class="topic-orientation topic-upright"/g)!==10)throw new Error(`Expected 10 upright interpretations: ${url}`);
+ if(count(/class="topic-orientation topic-reversed"/g)!==10)throw new Error(`Expected 10 reversed interpretations: ${url}`);
+ if(count(/UPRIGHT · 정방향일 때/g)!==10||count(/REVERSED · 역방향일 때/g)!==10)throw new Error(`Missing orientation labels: ${url}`);
+ if(html.includes('<p>undefined</p>')||html.includes('<p></p>'))throw new Error(`Empty card interpretation: ${url}`);
+}
+const magician=await readFile(localPath(origin+'/cards/the-magician/'),'utf8');
+if(!magician.includes('좋은 말과 실제 배려가 같은 방향으로 가는지 확인해 보세요.'))throw new Error('Magician reversed interpretation missing');
+
 console.log(`SEO QA passed: ${urls.length} sitemap pages, canonicals, metadata and internal links verified.`);

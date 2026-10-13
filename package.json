@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/core-smoke.mjs && node tests/seo-smoke.mjs"
+    "test": "node scripts/enrich-card-pages.mjs && node tests/core-smoke.mjs && node tests/seo-smoke.mjs",
+    "build:cards": "node scripts/enrich-card-pages.mjs"
   },
   "engines": {
     "node": ">=20"
