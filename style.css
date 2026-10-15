@@ -1584,3 +1584,38 @@ body{
   .seo-footer .merchant-info p{display:block}
   .seo-footer .merchant-info span:not(:first-child)::before{content:' · '}
 }
+
+/* Compact merchant disclosure: one-to-two-line footer footprint. */
+.seo-footer .merchant-info{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:2px 7px;
+  width:100%;
+  padding-top:9px;
+  margin-top:14px;
+  line-height:1.42;
+}
+.seo-footer .merchant-info h3{
+  display:inline;
+  margin:0 4px 0 0;
+  font-size:8.5px;
+  white-space:nowrap;
+}
+.seo-footer .merchant-info p{
+  display:inline;
+  margin:0;
+  font-size:8px;
+  line-height:1.42;
+}
+.seo-footer .merchant-info p+p::before{content:' · ';color:rgba(83,66,57,.24)}
+.seo-footer .merchant-info p span,
+.seo-footer .merchant-info p strong,
+.seo-footer .merchant-info p a{display:inline}
+.seo-footer .merchant-info p span+strong{margin-left:3px}
+.seo-footer .merchant-info p strong+span::before{content:' · ';margin:0 4px;color:rgba(83,66,57,.24)}
+@media(max-width:650px){
+  .seo-footer .merchant-info{gap:1px 5px;padding-top:8px;margin-top:12px}
+  .seo-footer .merchant-info p{display:inline;font-size:7.5px}
+  .seo-footer .merchant-info span:not(:first-child)::before{content:''}
+}
