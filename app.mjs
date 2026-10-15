@@ -9,7 +9,16 @@ import {
 import {resolveQuestionFocus,reconcileQuestionReading} from './core/question-focus.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const $=(s,r=document)=>[...r.querySelectorAll(s)];
+
+const footerNav=document.querySelector('.seo-footer nav');
+if(footerNav&&!footerNav.querySelector('[data-legal-links]')){
+  const wrap=document.createElement('span');
+  wrap.dataset.legalLinks='true';
+  wrap.className='footer-legal-links';
+  wrap.innerHTML='<a href="/deep-reading/">유료상품 · 심층 리딩</a><a href="/terms/">이용약관</a><a href="/privacy/">개인정보처리방침</a><a href="/refund/">환불정책</a>';
+  footerNav.append(wrap);
+}
 
 const state={
   slug:null,
