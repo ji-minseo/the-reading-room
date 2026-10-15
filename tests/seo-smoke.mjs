@@ -54,7 +54,7 @@ if(!termsHtml.includes('<h1>이용약관</h1>'))throw new Error('Terms page head
 if(!privacyHtml.includes('<h1>개인정보처리방침</h1>'))throw new Error('Privacy page heading missing');
 if(!refundHtml.includes('<h1>환불 및 청약철회 안내</h1>'))throw new Error('Refund page heading missing');
 
-for(const value of ['사업자 정보','지지마켓','329-59-00909','einimich@naver.com','통신판매업 신고번호','GitHub, Inc. (GitHub Pages)']){
+for(const value of ['사업자 정보','지지마켓','329-59-00909','010-3071-6160','einimich@naver.com','통신판매업 신고','신고 면제 대상','GitHub, Inc. (GitHub Pages)']){
  if(!homeHtml.includes(value))throw new Error(`Home merchant disclosure missing: ${value}`);
 }
 const appHtml=await readFile(join(root,'app.mjs'),'utf8');
