@@ -1551,32 +1551,34 @@ body{
 .seo-footer .merchant-info{
   grid-column:1/-1;
   width:100%;
-  margin-top:22px;
-  padding-top:18px;
-  border-top:1px solid var(--line);
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid rgba(83,66,57,.10);
+  opacity:.68;
 }
 .seo-footer .merchant-info h3{
-  margin:0 0 9px;
-  font-size:11px;
-  letter-spacing:.05em;
+  margin:0 0 7px;
+  color:rgba(83,66,57,.38);
+  font-size:9px;
+  font-weight:400;
+  letter-spacing:.03em;
 }
 .seo-footer .merchant-info p{
   display:flex;
   flex-wrap:wrap;
-  gap:5px 9px;
-  margin:5px 0;
-  color:var(--muted);
-  font-size:10px;
-  line-height:1.65;
+  gap:4px 8px;
+  margin:3px 0;
+  color:rgba(83,66,57,.32);
+  font-size:9px;
+  line-height:1.58;
 }
 .seo-footer .merchant-info strong{
-  color:var(--ink);
-  font-weight:600;
+  color:rgba(83,66,57,.42);
+  font-weight:400;
 }
 .seo-footer .merchant-info a{
   color:inherit;
-  text-decoration:underline;
-  text-underline-offset:2px;
+  text-decoration:none;
 }
 @media(max-width:650px){
   .seo-footer .merchant-info p{display:block}
