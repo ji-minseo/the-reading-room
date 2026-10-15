@@ -1423,3 +1423,125 @@ body{
   .question-focus p{font-size:12px}
   .timing-disclaimer{font-size:11px;line-height:1.7}
 }
+
+
+/* Payment review / legal pages */
+.footer-legal-links{display:contents}
+.legal-page{
+  width:min(920px,calc(100% - 36px));
+  margin:0 auto;
+  padding:72px 0 90px;
+}
+.legal-hero{
+  padding-bottom:28px;
+  border-bottom:1px solid var(--line);
+}
+.legal-hero>span{
+  display:block;
+  margin-bottom:10px;
+  color:var(--wine);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.legal-hero h1{
+  margin:0 0 12px;
+  font:700 clamp(34px,5vw,52px)/1.12 var(--serif);
+  letter-spacing:-.04em;
+}
+.legal-hero p{
+  max-width:700px;
+  margin:0;
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.85;
+  color:var(--muted);
+  word-break:keep-all;
+}
+.legal-stack{margin-top:22px}
+.legal-stack article{
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr);
+  gap:16px;
+  padding:20px 0;
+  border-bottom:1px solid var(--line);
+}
+.legal-stack article>span{
+  color:var(--wine);
+  font:700 12px/1.4 var(--serif);
+}
+.legal-stack h2{
+  margin:0 0 8px;
+  font:700 19px/1.45 var(--sans);
+}
+.legal-stack p{
+  margin:0 0 8px;
+  font-family:var(--sans);
+  font-size:13px;
+  line-height:1.85;
+  color:var(--muted);
+  word-break:keep-all;
+}
+.legal-stack a,
+.product-policy a{
+  color:var(--wine);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.legal-updated{
+  margin:22px 0 0;
+  color:var(--muted);
+  font-size:11px;
+}
+.product-price{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  margin-top:20px;
+}
+.product-price strong{
+  color:var(--wine);
+  font:700 30px/1 var(--serif);
+}
+.product-price span{
+  color:var(--muted);
+  font-size:12px;
+}
+.product-spec{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  margin-top:24px;
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+.product-spec article{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  padding:16px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.product-spec span{color:var(--muted);font-size:10px}
+.product-spec strong{font-size:13px;line-height:1.55}
+.product-policy{
+  margin-top:28px;
+  padding:20px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.28);
+}
+.product-policy strong{display:block;margin-bottom:6px}
+.product-policy p{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.75;
+}
+@media(max-width:650px){
+  .legal-page{width:min(100% - 28px,920px);padding:48px 0 68px}
+  .legal-hero h1{font-size:36px}
+  .legal-stack article{grid-template-columns:30px minmax(0,1fr);gap:10px;padding:17px 0}
+  .legal-stack h2{font-size:17px}
+  .legal-stack p{font-size:12px}
+  .product-spec{grid-template-columns:1fr}
+}
