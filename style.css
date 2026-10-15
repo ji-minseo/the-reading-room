@@ -1545,3 +1545,40 @@ body{
   .legal-stack p{font-size:12px}
   .product-spec{grid-template-columns:1fr}
 }
+
+
+/* Merchant disclosure */
+.seo-footer .merchant-info{
+  grid-column:1/-1;
+  width:100%;
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.seo-footer .merchant-info h3{
+  margin:0 0 9px;
+  font-size:11px;
+  letter-spacing:.05em;
+}
+.seo-footer .merchant-info p{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px 9px;
+  margin:5px 0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.65;
+}
+.seo-footer .merchant-info strong{
+  color:var(--ink);
+  font-weight:600;
+}
+.seo-footer .merchant-info a{
+  color:inherit;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+@media(max-width:650px){
+  .seo-footer .merchant-info p{display:block}
+  .seo-footer .merchant-info span:not(:first-child)::before{content:' · '}
+}
