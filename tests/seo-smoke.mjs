@@ -36,6 +36,24 @@ for(const url of urls){
   }
 }
 
+const paymentPages=['/deep-reading/','/terms/','/privacy/','/refund/'];
+for(const path of paymentPages){
+  const url=origin+path;
+  if(!urls.includes(url))throw new Error(`Missing payment review sitemap URL: ${url}`);
+}
+const [homeHtml,productHtml,termsHtml,privacyHtml,refundHtml]=await Promise.all([
+  readFile(join(root,'index.html'),'utf8'),
+  readFile(join(root,'deep-reading/index.html'),'utf8'),
+  readFile(join(root,'terms/index.html'),'utf8'),
+  readFile(join(root,'privacy/index.html'),'utf8'),
+  readFile(join(root,'refund/index.html'),'utf8')
+]);
+for(const href of paymentPages)if(!homeHtml.includes(`href="${href}"`))throw new Error(`Home footer missing review link: ${href}`);
+if(!productHtml.includes('4,900원')||!productHtml.includes('1회 리포트'))throw new Error('Deep Reading product price/details missing');
+if(!termsHtml.includes('<h1>이용약관</h1>'))throw new Error('Terms page heading missing');
+if(!privacyHtml.includes('<h1>개인정보처리방침</h1>'))throw new Error('Privacy page heading missing');
+if(!refundHtml.includes('<h1>환불 및 청약철회 안내</h1>'))throw new Error('Refund page heading missing');
+
 const detailCards=urls.filter(url=>/\/cards\/[^/]+\/$/.test(new URL(url).pathname));
 if(detailCards.length!==78)throw new Error(`Expected 78 indexed card details, found ${detailCards.length}`);
 for(const url of detailCards){
