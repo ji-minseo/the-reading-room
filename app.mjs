@@ -19,6 +19,14 @@ if(footerNav&&!footerNav.querySelector('[data-legal-links]')){
   wrap.innerHTML='<a href="/deep-reading/">유료상품 · 심층 리딩</a><a href="/terms/">이용약관</a><a href="/privacy/">개인정보처리방침</a><a href="/refund/">환불정책</a>';
   footerNav.append(wrap);
 }
+const footer=document.querySelector('.seo-footer');
+if(footer&&!footer.querySelector('.merchant-info')){
+  const merchant=document.createElement('section');
+  merchant.className='merchant-info';
+  merchant.setAttribute('aria-label','사업자 정보');
+  merchant.innerHTML='<h3>사업자 정보</h3><p><span>상호</span><strong>지지마켓</strong><span>대표자</span><strong>서지민</strong></p><p><span>사업자등록번호</span><strong>329-59-00909</strong><span>통신판매업 신고번호</span><strong>없음</strong></p><p><span>사업장 소재지</span><strong>서울 마포구 월드컵북로 361 902</strong></p><p><span>고객문의</span><strong><a href="mailto:einimich@naver.com">einimich@naver.com</a></strong></p><p><span>업종</span><strong>도매 및 소매업 &gt; 전자상거래 소매업</strong><span>호스팅 제공자</span><strong>GitHub, Inc. (GitHub Pages)</strong></p>';
+  footer.append(merchant);
+}
 
 const state={
   slug:null,
