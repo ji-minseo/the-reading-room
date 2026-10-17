@@ -10,7 +10,7 @@ import {resolveQuestionFocus,reconcileQuestionReading} from './core/question-foc
 import {deepReadingOffer,supportsDeepReading,deepReadingLabels} from './core/premium-config.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
-const $=(s,r=document)=>[...r.querySelectorAll(s)];
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 
 const krw=value=>new Intl.NumberFormat('ko-KR').format(value)+'원';
 function deepReadingOfferHTML(slug){
