@@ -9,7 +9,7 @@ import {
 import {resolveQuestionFocus,reconcileQuestionReading} from './core/question-focus.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
-const $=(s,r=document)=>[...r.querySelectorAll(s)];
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 
 const footerNav=document.querySelector('.seo-footer nav');
 if(footerNav&&!footerNav.querySelector('[data-legal-links]')){
