@@ -74,3 +74,7 @@ const magician=await readFile(localPath(origin+'/cards/the-magician/'),'utf8');
 if(!magician.includes('좋은 말과 실제 배려가 같은 방향으로 가는지 확인해 보세요.'))throw new Error('Magician reversed interpretation missing');
 
 console.log(`SEO QA passed: ${urls.length} sitemap pages, canonicals, metadata and internal links verified.`);
+
+const naverHome=await readFile(join(root,'index.html'),'utf8');
+const naverMeta='<meta name="naver-site-verification" content="f1a32368ffb0865e23382c6c8b949da483331037" />';
+if(!naverHome.includes(naverMeta)||naverHome.indexOf(naverMeta)>naverHome.indexOf('</head>'))throw new Error('Naver Search Advisor ownership tag missing from homepage head');
