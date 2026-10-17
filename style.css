@@ -1619,3 +1619,97 @@ body{
   .seo-footer .merchant-info p{display:inline;font-size:7.5px}
   .seo-footer .merchant-info span:not(:first-child)::before{content:''}
 }
+
+
+/* Deep Reading premium offer */
+.deep-reading-offer{
+  max-width:820px;
+  margin:28px auto 0;
+  padding:22px;
+  border:1px solid rgba(107,42,57,.18);
+  border-top:2px solid var(--wine);
+  border-radius:18px;
+  background:rgba(255,255,255,.30);
+  box-shadow:0 16px 36px rgba(68,45,42,.05);
+}
+.deep-reading-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:9px;
+  color:var(--muted);
+  font-size:10px;
+}
+.deep-reading-meta span:first-child{
+  color:var(--wine);
+  font-weight:800;
+  letter-spacing:.14em;
+}
+.deep-reading-offer>h3{
+  margin:0;
+  font:700 clamp(22px,3.2vw,30px)/1.4 var(--serif);
+  letter-spacing:-.035em;
+  word-break:keep-all;
+}
+.deep-reading-lead{
+  max-width:660px;
+  margin:9px 0 17px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.8;
+  word-break:keep-all;
+}
+.deep-reading-preview{
+  border-top:1px solid var(--line);
+  margin-bottom:18px;
+}
+.deep-reading-preview article{
+  display:grid;
+  grid-template-columns:32px minmax(0,1fr) 18px;
+  gap:10px;
+  align-items:start;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+.deep-reading-preview article>span{
+  color:var(--wine);
+  font:700 11px/1.5 var(--serif);
+}
+.deep-reading-preview strong{
+  display:block;
+  margin-bottom:3px;
+  font-size:13px;
+}
+.deep-reading-preview p{
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.7;
+  word-break:keep-all;
+}
+.deep-reading-preview i{
+  color:var(--gold);
+  font-style:normal;
+  opacity:.7;
+}
+.deep-reading-cta{
+  min-width:240px;
+}
+.deep-reading-offer>small{
+  display:block;
+  margin-top:9px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.6;
+}
+@media(max-width:650px){
+  .deep-reading-offer{padding:17px 15px;border-radius:15px}
+  .deep-reading-meta{align-items:flex-start;flex-direction:column;gap:4px}
+  .deep-reading-offer>h3{font-size:22px}
+  .deep-reading-lead{font-size:12px}
+  .deep-reading-preview article{grid-template-columns:27px minmax(0,1fr) 15px;gap:8px}
+  .deep-reading-preview strong{font-size:12px}
+  .deep-reading-preview p{font-size:10.5px}
+  .deep-reading-cta{width:100%;min-width:0}
+}
