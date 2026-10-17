@@ -78,3 +78,8 @@ console.log(`SEO QA passed: ${urls.length} sitemap pages, canonicals, metadata a
 const naverHome=await readFile(join(root,'index.html'),'utf8');
 const naverMeta='<meta name="naver-site-verification" content="f1a32368ffb0865e23382c6c8b949da483331037" />';
 if(!naverHome.includes(naverMeta)||naverHome.indexOf(naverMeta)>naverHome.indexOf('</head>'))throw new Error('Naver Search Advisor ownership tag missing from homepage head');
+
+const homepageTitle=homeHtml.match(/<title>([^<]+)<\/title>/)?.[1];
+const homepageOgTitle=homeHtml.match(/<meta property="og:title" content="([^"]+)"/)?.[1];
+if(!homepageTitle||homepageTitle.length>40)throw new Error('Naver homepage title must be within 40 characters');
+if(homepageTitle!==homepageOgTitle)throw new Error('Homepage Open Graph title must match the page title');
