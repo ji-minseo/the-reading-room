@@ -7,9 +7,31 @@ import {
   readingHeadline, timingInsight, nextAction, combinationInsights, generalAdvice, withParticle
 } from './core/engine.mjs';
 import {resolveQuestionFocus,reconcileQuestionReading} from './core/question-focus.mjs';
+import {deepReadingOffer,supportsDeepReading,deepReadingLabels} from './core/premium-config.mjs';
 
 const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const $=(s,r=document)=>[...r.querySelectorAll(s)];
+
+const krw=value=>new Intl.NumberFormat('ko-KR').format(value)+'원';
+function deepReadingOfferHTML(slug){
+  if(!supportsDeepReading(slug))return '';
+  const label=deepReadingLabels[slug]||'타로';
+  const rows=[
+    ['01','질문에 대한 더 선명한 결론','카드 전체의 움직이는 신호와 경계 신호를 나눠 한 문장으로 정리'],
+    ['02','왜 이렇게 읽었는지','가장 강한 카드와 반대 방향의 카드를 근거로 함께 설명'],
+    ['03',label+' 질문 맞춤 해석','방금 적은 질문과 선택한 현재 상황을 중심으로 다시 읽기'],
+    ['04','현실에서 확인할 신호','지금 해볼 것 · 피할 것 · 실제로 확인해야 할 조건 정리'],
+    ['05','마지막 3줄','지금 흐름 · 가장 중요한 변수 · 지금 할 일']
+  ];
+  return `<section class="deep-reading-offer" aria-labelledby="deep-reading-title">
+    <div class="deep-reading-meta"><span>DEEP READING</span><span>${krw(deepReadingOffer.price)} · 1회 리포트</span></div>
+    <h3 id="deep-reading-title">이 질문을, 한 번 더 깊게 읽어볼까요?</h3>
+    <p class="deep-reading-lead">새 카드를 다시 뽑는 게 아니라 방금 고른 카드와 질문을 그대로 이어서 더 명확하게 정리해요.</p>
+    <div class="deep-reading-preview">${rows.map(([n,title,copy])=>`<article><span>${n}</span><div><strong>${title}</strong><p>${copy}</p></div><i aria-hidden="true">⌁</i></article>`).join('')}</div>
+    <button class="reveal-button deep-reading-cta" type="button" data-action="deep-reading">심층 리딩 열기 · ${krw(deepReadingOffer.price)}</button>
+    <small>결제 전에는 비용이 청구되지 않아요. 결제 완료 후 웹에서 즉시 제공되는 디지털 콘텐츠입니다.</small>
+  </section>`;
+}
 
 const footerNav=document.querySelector('.seo-footer nav');
 if(footerNav&&!footerNav.querySelector('[data-legal-links]')){
@@ -760,6 +782,7 @@ function showResult(options={}){
       <h3>${state.slug==='today'?'오늘 가져갈 한 문장':'그래서, 이번 리딩의 결론은'}</h3>
       ${summary.map(line=>`<p>${line}</p>`).join('')}
     </section>
+    ${deepReadingOfferHTML(state.slug)}
   `;
 
   const yesno=$('#yesno-result');
@@ -853,6 +876,14 @@ async function shareResult(){
   }catch{
     if(feedback) feedback.textContent='공유하지 못했어요. 다시 시도해 주세요.';
   }
+}
+
+function openDeepReading(){
+  if(!supportsDeepReading(state.slug))return;
+  saveReadingSession('result');
+  const url=new URL(deepReadingOffer.checkoutPath,location.origin);
+  url.searchParams.set('reading',state.slug);
+  location.href=url.href;
 }
 
 function reset(){
@@ -991,7 +1022,8 @@ document.addEventListener('click',e=>{
     reshuffle,
     reveal:showResult,
     share:shareResult,
-    copy:copyResult
+    copy:copyResult,
+    'deep-reading':openDeepReading
   })[action]?.();
 });
 
